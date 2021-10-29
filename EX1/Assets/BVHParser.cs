@@ -4,6 +4,10 @@ using System.Globalization;
 using UnityEngine;
 
 
+//
+// Summary:
+//      BVH parsed object, representing a BVH file format
+//      via its root joint and motion section data.
 public class BVHData
 {
     public BVHJoint rootJoint; // Root BVHJoint object
@@ -17,15 +21,20 @@ public class BVHData
     }
 }
 
-
+//
+// Summary:
+//      BVH-Joint object, representing a joint by a GameObject.
 public class BVHJoint
 {
     public string name; // Name of the joint
     public Vector3 offset; // Offset relative to the parent position
+                           // The parent of the root joint is the global space, thus
+                           // it has XYZ-positions relative to the world origin
     public Vector3Int rotationChannels; // XYZ rotation channel indices in keyframe data
     public Vector3Int rotationOrder; // Order in which XYZ rotations need to be performed
     public Vector3Int positionChannels; // XYZ position channel indices in keyframe data (Optional!)
-    public List<BVHJoint> children; // List of children BVHJoints
+    public List<BVHJoint> children; // List of children BVHJoints 
+                                    // ("Forward declaration" - a recursive DAST)
     public GameObject gameObject; // Will hold GameObject of this joint in the scene
     public bool isEndSite; // Indicates if this joint an EndSite or not
 
@@ -112,7 +121,7 @@ public class BVHParser
     {
         BVHJoint joint = new BVHJoint(name, isEnd);
         var line = getNextLine();
-        while (line[KEYWORD] != "}")
+        while (line[KEYWORD] != "}") // Eat till the end of Hierarchy tree
         {
             if (line[KEYWORD] == "OFFSET")
             {
