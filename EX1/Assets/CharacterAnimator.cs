@@ -14,7 +14,6 @@ public class CharacterAnimator : MonoBehaviour
     private static readonly Vector3 SCALE = new Vector3(2.0f, 2.0f, 2.0f);
     private static readonly Vector3 HEAD_SCALE = new Vector3(8.0f, 8.0f, 8.0f);
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -56,11 +55,12 @@ public class CharacterAnimator : MonoBehaviour
         ScaleSphere(joint, jointSphere);
 
         // Apply Translate Transform' on joint
-        MatrixUtils.ApplyTransform(joint.gameObject, MatrixUtils.Translate(joint.offset + parentPosition));
+        Vector3 relativePos = joint.offset + parentPosition;
+        MatrixUtils.ApplyTransform(joint.gameObject, MatrixUtils.Translate(relativePos));
 
         foreach (BVHJoint child in joint.children)
         {
-            CreateJoint(child, joint.offset + parentPosition);
+            CreateJoint(child, relativePos);
         }
 
         return joint.gameObject;
