@@ -27,7 +27,7 @@ public class CharacterAnimator : MonoBehaviour
         Debug.Log(MatrixUtils.RotateTowardsVector(new Vector3(1.0f, 1.0f, 1.0f)).MultiplyVector(Vector3.up));
     }
 
-    // Returns a Matrix4x4 representing a rotation aligning 
+    // Returns a Matrix4x4 representing a rotation aligning
     // the up direction of an object with the given v
     Matrix4x4 RotateTowardsVector(Vector3 v) // TODO - to be tested/debugged!
     {
@@ -41,12 +41,12 @@ public class CharacterAnimator : MonoBehaviour
     }
 
     // Summary:
-    //      This method returns a 4X4 transform' matrix that rotates our object by 
+    //      This method returns a 4X4 transform' matrix that rotates our object by
     //      alphaAngle degrees around the received vector, `v`.
     Matrix4x4 RotateAroundVec(Vector3 v, float rotationAngle)
     {
-        // Find the angles that `v` induces on each of the 3-axes - and return rotation transorm' accordingly
-        Matrix4x4 xRotation = MatrixUtils.RotateX(90.0f - Mathf.Atan2(v.z, v.y) * Mathf.Rad2Deg);
+        // Find the angles that `v` induces on each of the 3-axes - and return rotation transform accordingly
+        Matrix4x4 xRotation = MatrixUtils.RotateX(-90.0f + Mathf.Atan2(v.y, v.z) * Mathf.Rad2Deg);
         Matrix4x4 zRotation = MatrixUtils.RotateZ(90.0f -
                         Mathf.Atan2(Mathf.Sqrt(Mathf.Pow(v.y, 2) + Mathf.Pow(v.z, 2)), v.x) * Mathf.Rad2Deg);
         Matrix4x4 yRotation = MatrixUtils.RotateY(rotationAngle);
