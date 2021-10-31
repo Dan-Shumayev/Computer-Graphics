@@ -59,8 +59,19 @@ public class CharacterAnimator : MonoBehaviour
     // Creates a Cylinder GameObject between two given points in 3D space
     GameObject CreateCylinderBetweenPoints(Vector3 p1, Vector3 p2, float diameter)
     {
-        // Your code here
-        return null;
+        var cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+
+        var heightScaling = (Vector3.Distance(p1, p2) / 2) * Vector3.up;
+        var diameterScaling = diameter * (Vector3.right + Vector3.forward);
+        var scaling = MatrixUtils.Scale(heightScaling + diameterScaling);
+
+        var rotation = RotateTowardsVector(p2 - p1);
+
+        var translation = MatrixUtils.Translate((p1 + p2) / 2);
+
+        MatrixUtils.ApplyTransform(cylinder, translation * rotation * scaling);
+
+        return cylinder;
     }
 
     // Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for its child joints
