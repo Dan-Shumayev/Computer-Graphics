@@ -94,6 +94,9 @@ public class CharacterAnimator : MonoBehaviour
         Vector3 relativePos = joint.offset + parentPosition;
         MatrixUtils.ApplyTransform(joint.gameObject, MatrixUtils.Translate(relativePos));
 
+        var bone = CreateCylinderBetweenPoints(parentPosition, relativePos, 0.5f);
+        bone.transform.parent = joint.gameObject.transform;
+
         foreach (BVHJoint child in joint.children)
         {
             CreateJoint(child, relativePos);
