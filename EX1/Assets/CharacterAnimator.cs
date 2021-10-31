@@ -11,8 +11,8 @@ public class CharacterAnimator : MonoBehaviour
     private BVHData data; // BVH data of the BVHFile will be loaded here
     private int currFrame = 0; // Current frame of the animation
 
-    private static readonly Vector3 SCALE = new Vector3(2.0f, 2.0f, 2.0f);
-    private static readonly Vector3 HEAD_SCALE = new Vector3(8.0f, 8.0f, 8.0f);
+    private static readonly Vector3 Scale = new Vector3(2.0f, 2.0f, 2.0f);
+    private static readonly Vector3 HeadScale = new Vector3(8.0f, 8.0f, 8.0f);
 
     // Start is called before the first frame update
     void Start()
@@ -93,14 +93,8 @@ public class CharacterAnimator : MonoBehaviour
 
     private void ScaleSphere(BVHJoint joint, GameObject jointSphere)
     {
-        if (joint.name.Equals("HEAD"))
-        {
-            MatrixUtils.ApplyTransform(jointSphere, MatrixUtils.Scale(SCALE));
-        }
-        else
-        {
-            MatrixUtils.ApplyTransform(jointSphere, MatrixUtils.Scale(HEAD_SCALE));
-        }
+        MatrixUtils.ApplyTransform(jointSphere,
+            joint.name == "Head" ? MatrixUtils.Scale(HeadScale) : MatrixUtils.Scale(Scale));
     }
 
     // Transforms BVHJoint according to the keyframe channel data, and recursively transforms its children
