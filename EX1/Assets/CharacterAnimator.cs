@@ -29,20 +29,22 @@ public class CharacterAnimator : MonoBehaviour
 
     // Returns a Matrix4x4 representing a rotation aligning
     // the up direction of an object with the given v
-    Matrix4x4 RotateTowardsVector(Vector3 v) // TODO - to be tested/debugged!
+    Matrix4x4 RotateTowardsVector(Vector3 v)
     {
         // The normal of the plane spanned by `v` and the object to be directed
-        Vector3 rotationAxis = Vector3.Cross(v.normalized, transform.up);
-        // v X transform.up = |v.normalized|*|transform.up|*Sin(alpha) (Cross-product)
-        float rotationAngle = Mathf.Asin(rotationAxis.magnitude) * Mathf.Rad2Deg;
+        Vector3 rotationAxis = Vector3.Cross(Vector3.up, v);
+
+        // The angle (in degrees) between `Vector3.up` and `v`, positive if `v` lies clockwise from
+        // `Vector3.up`, and negative otherwise.
+        float rotationAngle = Vector3.SignedAngle(Vector3.up, v, rotationAxis);
 
         // The rotation process described in TA-2
-        return RotateAroundVec(rotationAxis.normalized, rotationAngle);
+        return RotateAroundVec(rotationAxis, rotationAngle);
     }
 
     // Summary:
     //      This method returns a 4X4 transform' matrix that rotates our object by
-    //      alphaAngle degrees around the received vector, `v`.
+    //      rotationAngle degrees around the received vector, `v`.
     Matrix4x4 RotateAroundVec(Vector3 v, float rotationAngle)
     {
         // Find the angles that `v` induces on each of the 3-axes - and return rotation transform accordingly
