@@ -77,11 +77,6 @@ public class CharacterAnimator : MonoBehaviour
     // Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for its child joints
     GameObject CreateJoint(BVHJoint joint, Vector3 parentPosition)
     {
-        if (joint.isEndSite)
-        {
-            return null;
-        }
-
         joint.gameObject = new GameObject(joint.name);
 
         // Create a sphere representing the joint, and make it a child of joint
