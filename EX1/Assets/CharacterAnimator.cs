@@ -145,9 +145,31 @@ public class CharacterAnimator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (animate)
+        if (!animate)
         {
-            // Your code here
+            return;
         }
+
+        _timeSinceLastFrame += Time.deltaTime;
+
+        var advancedFrames = (int)(_timeSinceLastFrame / data.frameLength);
+
+        if (advancedFrames == 0)
+        {
+            return;
+        }
+
+        currFrame = (currFrame + advancedFrames) % data.numFrames;
+
+        var currentKeyframe = data.keyframes[currFrame];
+
+        var rootPosition = new Vector3(currentKeyframe[data.rootJoint.positionChannels.x],
+            currentKeyframe[data.rootJoint.positionChannels.y],
+            currentKeyframe[data.rootJoint.positionChannels.z]);
+        var rootTranslation = MatrixUtils.Translate(rootPosition);
+
+        TransformJoint(data.rootJoint, rootTranslation, currentKeyframe);
+
+        _timeSinceLastFrame -= advancedFrames * data.frameLength;
     }
 }
