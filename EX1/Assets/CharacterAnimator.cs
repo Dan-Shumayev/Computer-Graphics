@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CharacterAnimator : MonoBehaviour
@@ -13,6 +12,11 @@ public class CharacterAnimator : MonoBehaviour
 
     private static readonly Vector3 Scale = new Vector3(2.0f, 2.0f, 2.0f);
     private static readonly Vector3 HeadScale = new Vector3(8.0f, 8.0f, 8.0f);
+
+    /// <summary>
+    /// Time in seconds since the last animation framed was drawn.
+    /// </summary>
+    private float _timeSinceLastFrame = 0f;
 
     // Start is called before the first frame update
     void Start()
@@ -109,7 +113,33 @@ public class CharacterAnimator : MonoBehaviour
     // Transforms BVHJoint according to the keyframe channel data, and recursively transforms its children
     private void TransformJoint(BVHJoint joint, Matrix4x4 parentTransform, float[] keyframe)
     {
-        // Your code here
+        var rotation = Matrix4x4.identity;
+
+        if (!joint.isEndSite)
+        {
+            var xRotation = MatrixUtils.RotateX(keyframe[joint.rotationChannels.x]);
+            var yRotation = MatrixUtils.RotateY(keyframe[joint.rotationChannels.y]);
+            var zRotation = MatrixUtils.RotateZ(keyframe[joint.rotationChannels.z]);
+
+            var rotations = new[] { xRotation, yRotation, zRotation };
+            var rotationOrders = new[] { joint.rotationOrder.x, joint.rotationOrder.y, joint.rotationOrder.z };
+            Array.Sort(rotationOrders, rotations);
+
+            rotation = rotations.Aggregate((a, b) => a * b);
+        }
+
+        var translation = MatrixUtils.Translate(joint.offset);
+
+        var localTransform = translation * rotation;
+
+        var globalTransform = parentTransform * localTransform;
+
+        MatrixUtils.ApplyTransform(joint.gameObject, globalTransform);
+
+        foreach (var child in joint.children)
+        {
+            TransformJoint(child, globalTransform, keyframe);
+        }
     }
 
     // Update is called once per frame
