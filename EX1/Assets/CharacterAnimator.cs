@@ -14,7 +14,7 @@ public class CharacterAnimator : MonoBehaviour
     private static readonly Vector3 HeadScale = new Vector3(8.0f, 8.0f, 8.0f);
 
     /// <summary>
-    /// Time in seconds since the last animation framed was drawn.
+    /// Time in seconds since the last animation frame was drawn.
     /// </summary>
     private float _timeSinceLastFrame = 0f;
 
@@ -31,8 +31,11 @@ public class CharacterAnimator : MonoBehaviour
         Debug.Log(MatrixUtils.RotateTowardsVector(new Vector3(1.0f, 1.0f, 1.0f)).MultiplyVector(Vector3.up));
     }
 
-    // Returns a Matrix4x4 representing a rotation aligning
-    // the up direction of an object with the given v
+    /// <summary>
+    /// Returns a Matrix4x4 representing a rotation aligning the up direction of an
+    /// object with the given vector <paramref name="v"/>.
+    /// </summary>
+    /// <param name="v">A vector representing the new up direction, after the rotation.</param>
     Matrix4x4 RotateTowardsVector(Vector3 v)
     {
         // The normal of the plane spanned by `v` and the object to be directed
@@ -46,10 +49,13 @@ public class CharacterAnimator : MonoBehaviour
         return RotateAroundVec(rotationAxis, rotationAngle);
     }
 
-    // Summary:
-    //      This method returns a 4X4 transform' matrix that rotates our object by
-    //      rotationAngle degrees around the received vector, `v`.
-    Matrix4x4 RotateAroundVec(Vector3 v, float rotationAngle)
+    /// <summary>
+    /// Returns a 4x4 transform matrix that rotates an object by <paramref name="rotationAngle"/>
+    /// degrees around the vector <paramref name="v"/>, clockwise.
+    /// </summary>
+    /// <param name="v">Vector to rotate around.</param>
+    /// <param name="rotationAngle">Angle, in degrees, to rotate around the vector.</param>
+    private static Matrix4x4 RotateAroundVec(Vector3 v, float rotationAngle)
     {
         // Find the angles that `v` induces on each of the 3-axes - and return rotation transform accordingly
         Matrix4x4 xRotation = MatrixUtils.RotateX(-90.0f + Mathf.Atan2(v.y, v.z) * Mathf.Rad2Deg);
@@ -60,25 +66,42 @@ public class CharacterAnimator : MonoBehaviour
         return xRotation.inverse * zRotation.inverse * yRotation * zRotation * xRotation;
     }
 
-    // Creates a Cylinder GameObject between two given points in 3D space
+    /// <summary>
+    /// Creates a Cylinder GameObject between two given points in 3D space
+    /// </summary>
+    /// <param name="p1">First point from which to draw the cylinder</param>
+    /// <param name="p2">Second point at which the cylinder should end</param>
+    /// <param name="diameter">Width (diameter) of the cylinder to be drawn</param>
     GameObject CreateCylinderBetweenPoints(Vector3 p1, Vector3 p2, float diameter)
     {
+        // Create a cylinder with height 2 and diameter 1, centered at the origin.
         var cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
 
+        // Create a scaling matrix for the required cylinder dimensions. We scale
+        // vertically (Y) by the distance between the points divided by the initial height (2),
+        // and horizontally (X, Z) by the diameter.
         var heightScaling = (Vector3.Distance(p1, p2) / 2) * Vector3.up;
         var diameterScaling = diameter * (Vector3.right + Vector3.forward);
         var scaling = MatrixUtils.Scale(heightScaling + diameterScaling);
 
+        // Rotate so that the cylinder points in the direction of the line p1 - p2.
         var rotation = RotateTowardsVector(p2 - p1);
 
+        // Put the center of the cylinder at the midpoint between p1 and p2.
         var translation = MatrixUtils.Translate((p1 + p2) / 2);
 
+        // Apply the complete transform.
         MatrixUtils.ApplyTransform(cylinder, translation * rotation * scaling);
 
         return cylinder;
     }
 
-    // Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for its child joints
+    /// <summary>
+    /// Creates a GameObject representing a given BVHJoint and recursively creates GameObjects for
+    /// its child joints.
+    /// </summary>
+    /// <param name="joint">The joint that will be drawn, along with any child joints it may have.</param>
+    /// <param name="parentPosition">The 3D position of the parent of the given joint.</param>
     GameObject CreateJoint(BVHJoint joint, Vector3 parentPosition)
     {
         joint.gameObject = new GameObject(joint.name);
@@ -104,15 +127,29 @@ public class CharacterAnimator : MonoBehaviour
         return joint.gameObject;
     }
 
-    private void ScaleSphere(BVHJoint joint, GameObject jointSphere)
+    /// <summary>
+    /// Scales a joint's sphere to the correct dimensions.
+    /// </summary>
+    /// <param name="joint">Joint whose sphere is to be scaled.</param>
+    /// <param name="jointSphere">The sphere to scale.</param>
+    private static void ScaleSphere(BVHJoint joint, GameObject jointSphere)
     {
         MatrixUtils.ApplyTransform(jointSphere,
             joint.name == "Head" ? MatrixUtils.Scale(HeadScale) : MatrixUtils.Scale(Scale));
     }
 
-    // Transforms BVHJoint according to the keyframe channel data, and recursively transforms its children
+    /// <summary>
+    /// Transforms a BVHJoint according to the keyframe channel data, and recursively transforms
+    /// its children.
+    /// </summary>
+    /// <param name="joint">The joint to be transformed, along with any child joints it may have.</param>
+    /// <param name="parentTransform">The parent joint's transformation matrix.</param>
+    /// <param name="keyframe">The channel data to use in the transforms.</param>
     private void TransformJoint(BVHJoint joint, Matrix4x4 parentTransform, float[] keyframe)
     {
+        // Create a rotation matrix. Since end sites don't have rotations,
+        // we default to the identity matrix.
+
         var rotation = Matrix4x4.identity;
 
         if (!joint.isEndSite)
@@ -128,6 +165,7 @@ public class CharacterAnimator : MonoBehaviour
             rotation = rotations.Aggregate((a, b) => a * b);
         }
 
+        // Create a translation matrix. Even end sites have this.
         var translation = MatrixUtils.Translate(joint.offset);
 
         var localTransform = translation * rotation;
