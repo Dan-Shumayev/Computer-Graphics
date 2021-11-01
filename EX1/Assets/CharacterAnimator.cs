@@ -26,9 +26,6 @@ public class CharacterAnimator : MonoBehaviour
 
         CreateJoint(data.rootJoint, Vector3.zero); // Position the center of our skeleton (Root joint object)
                                                    // at the origin (World-Space)
-
-        Debug.Log(RotateTowardsVector(new Vector3(1.0f, 1.0f, 1.0f)).MultiplyVector(Vector3.up));
-        Debug.Log(MatrixUtils.RotateTowardsVector(new Vector3(1.0f, 1.0f, 1.0f)).MultiplyVector(Vector3.up));
     }
 
     /// <summary>
