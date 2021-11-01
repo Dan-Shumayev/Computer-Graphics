@@ -83,6 +83,7 @@ public class CharacterAnimator : MonoBehaviour
         }
 
         joint.gameObject = new GameObject(joint.name);
+
         // Create a sphere representing the joint, and make it a child of joint
         GameObject jointSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         jointSphere.transform.parent = joint.gameObject.transform;
@@ -90,16 +91,15 @@ public class CharacterAnimator : MonoBehaviour
         // Apply Scale Transform' on the sphere
         ScaleSphere(joint, jointSphere);
 
-        // Apply Translate Transform' on joint
+        // Apply Translate Transform on joint
         Vector3 relativePos = joint.offset + parentPosition;
         MatrixUtils.ApplyTransform(joint.gameObject, MatrixUtils.Translate(relativePos));
 
-        var bone = CreateCylinderBetweenPoints(parentPosition, relativePos, 0.5f);
-        bone.transform.parent = joint.gameObject.transform;
-
         foreach (BVHJoint child in joint.children)
         {
-            CreateJoint(child, relativePos);
+            var childJoint = CreateJoint(child, relativePos);
+            var bone = CreateCylinderBetweenPoints(relativePos, childJoint.transform.position, 0.5f);
+            bone.transform.parent = joint.gameObject.transform;
         }
 
         return joint.gameObject;
