@@ -51,7 +51,7 @@ public class CharacterAnimator : MonoBehaviour
         v = v.normalized;
 
         // Find the angles that `v` induces on each of the 3-axes - and return rotation transform accordingly
-        Matrix4x4 xRotation = MatrixUtils.RotateX(-90.0f + Mathf.Atan2(v.y, v.z) * Mathf.Rad2Deg);
+        Matrix4x4 xRotation = MatrixUtils.RotateX(-(90.0f - Mathf.Atan2(v.y, v.z) * Mathf.Rad2Deg));
         Matrix4x4 zRotation = MatrixUtils.RotateZ(90.0f -
                         Mathf.Atan2(Mathf.Sqrt(Mathf.Pow(v.y, 2) + Mathf.Pow(v.z, 2)), v.x) * Mathf.Rad2Deg);
         Matrix4x4 yRotation = MatrixUtils.RotateY(rotationAngle);
