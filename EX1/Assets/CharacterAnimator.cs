@@ -47,6 +47,9 @@ public class CharacterAnimator : MonoBehaviour
     //      rotationAngle degrees around the received vector, `v`.
     Matrix4x4 RotateAroundVec(Vector3 v, float rotationAngle)
     {
+        // The following assumes v is normalized.
+        v = v.normalized;
+
         // Find the angles that `v` induces on each of the 3-axes - and return rotation transform accordingly
         Matrix4x4 xRotation = MatrixUtils.RotateX(-90.0f + Mathf.Atan2(v.y, v.z) * Mathf.Rad2Deg);
         Matrix4x4 zRotation = MatrixUtils.RotateZ(90.0f -
