@@ -21,7 +21,7 @@ public class CharacterAnimator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        BVHParser parser = new BVHParser();
+        var parser = new BVHParser();
         data = parser.Parse(BVHFile);
 
         CreateJoint(data.rootJoint, Vector3.zero); // Position the center of our skeleton (Root joint object)
@@ -80,15 +80,15 @@ public class CharacterAnimator : MonoBehaviour
         // Create a scaling matrix for the required cylinder dimensions. We scale
         // vertically (Y) by the distance between the points divided by the initial height (2),
         // and horizontally (X, Z) by the diameter.
-        var heightScaling = (Vector3.Distance(p1, p2) / 2) * Vector3.up;
-        var diameterScaling = diameter * (Vector3.right + Vector3.forward);
-        var scaling = MatrixUtils.Scale(heightScaling + diameterScaling);
+        Vector3 heightScaling = (Vector3.Distance(p1, p2) / 2) * Vector3.up;
+        Vector3 diameterScaling = diameter * (Vector3.right + Vector3.forward);
+        Matrix4x4 scaling = MatrixUtils.Scale(heightScaling + diameterScaling);
 
         // Rotate so that the cylinder points in the direction of the line p1 - p2.
-        var rotation = RotateTowardsVector(p2 - p1);
+        Matrix4x4 rotation = RotateTowardsVector(p2 - p1);
 
         // Put the center of the cylinder at the midpoint between p1 and p2.
-        var translation = MatrixUtils.Translate((p1 + p2) / 2);
+        Matrix4x4 translation = MatrixUtils.Translate((p1 + p2) / 2);
 
         // Apply the complete transform.
         MatrixUtils.ApplyTransform(cylinder, translation * rotation * scaling);
@@ -107,7 +107,7 @@ public class CharacterAnimator : MonoBehaviour
         joint.gameObject = new GameObject(joint.name);
 
         // Create a sphere representing the joint, and make it a child of joint
-        GameObject jointSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        var jointSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         jointSphere.transform.parent = joint.gameObject.transform;
 
         // Apply Scale Transform' on the sphere
@@ -119,8 +119,8 @@ public class CharacterAnimator : MonoBehaviour
 
         foreach (BVHJoint child in joint.children)
         {
-            var childJoint = CreateJoint(child, relativePos);
-            var bone = CreateCylinderBetweenPoints(relativePos, childJoint.transform.position, 0.5f);
+            GameObject childJoint = CreateJoint(child, relativePos);
+            GameObject bone = CreateCylinderBetweenPoints(relativePos, childJoint.transform.position, 0.5f);
             bone.transform.parent = joint.gameObject.transform;
         }
 
@@ -150,31 +150,31 @@ public class CharacterAnimator : MonoBehaviour
         // Create a rotation matrix. Since end sites don't have rotations,
         // we default to the identity matrix.
 
-        var rotation = Matrix4x4.identity;
+        Matrix4x4 rotation = Matrix4x4.identity;
 
         if (!joint.isEndSite)
         {
-            var xRotation = MatrixUtils.RotateX(keyframe[joint.rotationChannels.x]);
-            var yRotation = MatrixUtils.RotateY(keyframe[joint.rotationChannels.y]);
-            var zRotation = MatrixUtils.RotateZ(keyframe[joint.rotationChannels.z]);
+            Matrix4x4 xRotation = MatrixUtils.RotateX(keyframe[joint.rotationChannels.x]);
+            Matrix4x4 yRotation = MatrixUtils.RotateY(keyframe[joint.rotationChannels.y]);
+            Matrix4x4 zRotation = MatrixUtils.RotateZ(keyframe[joint.rotationChannels.z]);
 
-            var rotations = new[] { xRotation, yRotation, zRotation };
-            var rotationOrders = new[] { joint.rotationOrder.x, joint.rotationOrder.y, joint.rotationOrder.z };
+            Matrix4x4[] rotations = { xRotation, yRotation, zRotation };
+            int[] rotationOrders = { joint.rotationOrder.x, joint.rotationOrder.y, joint.rotationOrder.z };
             Array.Sort(rotationOrders, rotations);
 
             rotation = rotations.Aggregate((a, b) => a * b);
         }
 
         // Create a translation matrix. Even end sites have this.
-        var translation = MatrixUtils.Translate(joint.offset);
+        Matrix4x4 translation = MatrixUtils.Translate(joint.offset);
 
-        var localTransform = translation * rotation;
+        Matrix4x4 localTransform = translation * rotation;
 
-        var globalTransform = parentTransform * localTransform;
+        Matrix4x4 globalTransform = parentTransform * localTransform;
 
         MatrixUtils.ApplyTransform(joint.gameObject, globalTransform);
 
-        foreach (var child in joint.children)
+        foreach (BVHJoint child in joint.children)
         {
             TransformJoint(child, globalTransform, keyframe);
         }
@@ -199,12 +199,12 @@ public class CharacterAnimator : MonoBehaviour
 
         currFrame = (currFrame + advancedFrames) % data.numFrames;
 
-        var currentKeyframe = data.keyframes[currFrame];
+        float[] currentKeyframe = data.keyframes[currFrame];
 
         var rootPosition = new Vector3(currentKeyframe[data.rootJoint.positionChannels.x],
             currentKeyframe[data.rootJoint.positionChannels.y],
             currentKeyframe[data.rootJoint.positionChannels.z]);
-        var rootTranslation = MatrixUtils.Translate(rootPosition);
+        Matrix4x4 rootTranslation = MatrixUtils.Translate(rootPosition);
 
         TransformJoint(data.rootJoint, rootTranslation, currentKeyframe);
 
