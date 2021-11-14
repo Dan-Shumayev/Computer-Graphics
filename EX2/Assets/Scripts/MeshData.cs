@@ -31,29 +31,19 @@ public class MeshData
         return mesh;
     }
 
-    // Calculates surface normals for each vertex, according to face orientation
+    /// <summary>
+    /// Calculates surface normals for each vertex, according to face orientation
+    /// </summary>
     public void CalculateNormals()
     {
         Vector3[] surfaceNormals = SurfaceNormals.ToArray();
 
-        var facesPerVertex = new SortedDictionary<int, List<int>>();
-        foreach (var item in FaceVertices.Select((faceVertices, face) => new { face, faceVertices }))
-        {
-            foreach (int vertex in new[] { item.faceVertices.Item1, item.faceVertices.Item2, item.faceVertices.Item3 })
-            {
-                if (!facesPerVertex.ContainsKey(vertex))
-                {
-                    facesPerVertex[vertex] = new List<int>();
-                }
-
-                facesPerVertex[vertex].Add(item.face);
-            }
-        }
-
         // For each vertex, get the normals of all the surfaces it is contained in, then sum 'em up and normalize.
-        normals = facesPerVertex.Select(pair =>
-            pair.Value.Select(faceIndex => surfaceNormals[faceIndex]).Aggregate((a, b) => a + b).normalized).ToArray();
-        Debug.Assert(normals.Length == vertices.Count);
+        Vector3[] newNormals = VertexFaces.Select(faces =>
+            faces.Select(faceIndex => surfaceNormals[faceIndex]).Aggregate((a, b) => a + b).normalized).ToArray();
+        Debug.Assert(newNormals.Length == vertices.Count);
+
+        normals = newNormals;
     }
 
     // Edits mesh such that each face has a unique set of 3 vertices
@@ -89,6 +79,32 @@ public class MeshData
                     triangles[index + 1],
                     triangles[index + 2]);
             }
+        }
+    }
+
+    /// <summary>
+    /// Returns all faces that every vertex in the mesh belongs to.
+    /// </summary>
+    private IEnumerable<List<int>> VertexFaces
+    {
+        get
+        {
+            var facesPerVertex = new SortedDictionary<int, List<int>>();
+            foreach (var item in FaceVertices.Select((faceVertices, face) => new { face, faceVertices }))
+            {
+                foreach (int vertex in new[]
+                    { item.faceVertices.Item1, item.faceVertices.Item2, item.faceVertices.Item3 })
+                {
+                    if (!facesPerVertex.ContainsKey(vertex))
+                    {
+                        facesPerVertex[vertex] = new List<int>();
+                    }
+
+                    facesPerVertex[vertex].Add(item.face);
+                }
+            }
+
+            return facesPerVertex.Values;
         }
     }
 
