@@ -11,14 +11,15 @@ public class MeshData
     public List<int> triangles; // Indices of vertices that make up the mesh faces
     public Vector3[] normals; // The normals of the mesh, one per vertex
 
-    // Class initializer
     public MeshData()
     {
         vertices = new List<Vector3>();
         triangles = new List<int>();
     }
 
-    // Returns a Unity Mesh of this MeshData that can be rendered
+    /// <summary>
+    /// Returns a Unity Mesh of this MeshData that can be rendered.
+    /// </summary>
     public Mesh ToUnityMesh()
     {
         Mesh mesh = new Mesh
@@ -46,9 +47,14 @@ public class MeshData
         normals = newNormals;
     }
 
-    // Edits mesh such that each face has a unique set of 3 vertices
+    /// <summary>
+    /// Edits mesh such that each face has a unique set of 3 vertices
+    /// </summary>
     public void MakeFlatShaded()
     {
+        // Make it so that each face has a unique set of 3 vertices by duplicating
+        // each original vertex for each face it is a part of.
+
         var newVertices = new List<Vector3>(triangles.Count * 3);
         var newTriangles = new List<int>(triangles.Count);
         foreach ((int p1, int p2, int p3) in FaceVertices)
@@ -66,6 +72,9 @@ public class MeshData
         triangles = newTriangles;
     }
 
+    /// <summary>
+    /// Returns a 3-tuple of vertex indices (in the <see cref="vertices"/> list) for each triangle in the mesh.
+    /// </summary>
     private IEnumerable<Tuple<int, int, int>> FaceVertices
     {
         get
@@ -108,6 +117,9 @@ public class MeshData
         }
     }
 
+    /// <summary>
+    /// Calculates the surface normal for each triangle in the mesh.
+    /// </summary>
     private IEnumerable<Vector3> SurfaceNormals
     {
         get
