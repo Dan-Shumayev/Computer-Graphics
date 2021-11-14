@@ -59,7 +59,21 @@ public class MeshData
     // Edits mesh such that each face has a unique set of 3 vertices
     public void MakeFlatShaded()
     {
-        // Your implementation
+        var newVertices = new List<Vector3>(triangles.Count * 3);
+        var newTriangles = new List<int>(triangles.Count);
+        foreach ((int p1, int p2, int p3) in FaceVertices)
+        {
+            newVertices.Add(vertices[p1]);
+            newVertices.Add(vertices[p2]);
+            newVertices.Add(vertices[p3]);
+
+            newTriangles.Add(newVertices.Count - 3);
+            newTriangles.Add(newVertices.Count - 2);
+            newTriangles.Add(newVertices.Count - 1);
+        }
+
+        vertices = newVertices;
+        triangles = newTriangles;
     }
 
     private IEnumerable<Tuple<int, int, int>> FaceVertices
