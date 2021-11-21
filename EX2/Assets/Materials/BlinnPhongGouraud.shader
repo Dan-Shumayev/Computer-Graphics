@@ -20,7 +20,7 @@
                 #include "UnityCG.cginc"
 
                 // From UnityCG
-                uniform fixed4 _LightColor0; 
+                uniform fixed4 _LightColor0;
 
                 // Declare used properties
                 uniform fixed4 _DiffuseColor;
@@ -36,21 +36,33 @@
 
                 struct v2f
                 {
-                    float4 pos : SV_POSITION;
+                    float4 pos      : SV_POSITION;
+                    fixed4 color    : COLOR0;
                 };
 
 
                 v2f vert (appdata input)
                 {
+                    float3 world_space_normal = normalize(mul(unity_ObjectToWorld, input.normal));
+                    float3 world_light_direction = normalize(_WorldSpaceLightPos0);
+
+                    fixed4 color_d = max(dot(world_light_direction, world_space_normal), 0) * _DiffuseColor * _LightColor0;
+
+                    float3 h = normalize((world_light_direction + normalize(_WorldSpaceCameraPos)) / 2);
+                    fixed4 color_s = pow(max(dot(world_space_normal, h), 0), _Shininess) * _SpecularColor * _LightColor0;
+
+                    fixed4 color_a = _AmbientColor * _LightColor0;
+
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
+                    output.color = color_d + color_s + color_a;
                     return output;
                 }
 
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return fixed4(0, 0, 1.0, 1.0);
+                    return input.color;
                 }
 
             ENDCG
