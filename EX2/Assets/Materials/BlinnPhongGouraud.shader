@@ -43,11 +43,12 @@
 
                 v2f vert (appdata input)
                 {
-                    float3 world_space_normal = mul(unity_ObjectToWorld, input.normal);
+                    float3 world_space_normal = normalize(mul(unity_ObjectToWorld, input.normal));
+                    float3 world_light_direction = normalize(_WorldSpaceLightPos0);
 
-                    fixed4 color_d = max(dot(_WorldSpaceLightPos0, world_space_normal), 0) * _DiffuseColor * _LightColor0;
+                    fixed4 color_d = max(dot(world_light_direction, world_space_normal), 0) * _DiffuseColor * _LightColor0;
 
-                    float3 h = normalize((_WorldSpaceLightPos0 + _WorldSpaceCameraPos) / 2);
+                    float3 h = normalize((world_light_direction + normalize(_WorldSpaceCameraPos)) / 2);
                     fixed4 color_s = pow(max(dot(world_space_normal, h), 0), _Shininess) * _SpecularColor * _LightColor0;
 
                     fixed4 color_a = _AmbientColor * _LightColor0;
