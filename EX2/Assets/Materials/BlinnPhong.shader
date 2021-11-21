@@ -1,4 +1,4 @@
-﻿Shader "CG/BlinnPhong"
+﻿Shader "CG/BlinnPhongGouraud"
 {
     Properties
     {
@@ -11,7 +11,7 @@
     {
         Pass
         {
-            Tags { "LightMode" = "ForwardBase" }
+            Tags { "LightMode" = "ForwardBase" } 
 
             CGPROGRAM
 
@@ -20,7 +20,7 @@
                 #include "UnityCG.cginc"
 
                 // From UnityCG
-                uniform fixed4 _LightColor0; 
+                uniform fixed4 _LightColor0;
 
                 // Declare used properties
                 uniform fixed4 _DiffuseColor;
@@ -28,29 +28,52 @@
                 uniform fixed4 _AmbientColor;
                 uniform float _Shininess;
 
-                struct appdata
-                { 
+                struct appdata {
                     float4 vertex : POSITION;
                     float3 normal : NORMAL;
                 };
 
-                struct v2f
-                {
+                struct v2f {
                     float4 pos : SV_POSITION;
+                    float3 normalDirection : NORMAL;                    
                 };
-
-
-                v2f vert (appdata input)
+        
+                v2f vert(appdata input) 
                 {
                     v2f output;
+        
+                    output.normalDirection = normalize(mul(unity_ObjectToWorld, input.normal));
                     output.pos = UnityObjectToClipPos(input.vertex);
+
                     return output;
                 }
-
-
-                fixed4 frag (v2f input) : SV_Target
+        
+                fixed4 frag(v2f input) : SV_Target
                 {
-                    return fixed4(0, 0, 1.0, 1.0);
+                    // Calculate directions
+                    float3 lightDirection = normalize(_WorldSpaceLightPos0);
+                    float3 viewDirection = normalize(_WorldSpaceCameraPos 
+                                           - 
+                                           mul(unity_ObjectToWorld, input.pos));
+                    float3 normalDirection = normalize(input.normalDirection);
+
+                    // Calculate illuminated colors
+                    fixed4 color_a = _LightColor0 * _AmbientColor;
+                    fixed4 color_d = _LightColor0 * _DiffuseColor * 
+                                                max(0, dot(normalDirection, lightDirection));
+                    fixed4 color_s = fixed4(0.0, 0.0, 0.0, 0.0);
+
+                    // Specular color defined relative to the light source
+                    //   Highlights can be seen only within faces that face light source
+                    if (dot(normalDirection, lightDirection) >= 0)
+                    {
+                        float3 h = normalize((lightDirection + normalize(_WorldSpaceCameraPos)) / 2);
+
+                        color_s = _SpecularColor * _LightColor0 * 
+                                            pow(max(dot(normalDirection, h), 0), _Shininess);
+                    }
+
+                    return color_a + color_d + color_s;
                 }
 
             ENDCG
