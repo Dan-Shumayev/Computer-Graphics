@@ -1,4 +1,4 @@
-﻿Shader "CG/BlinnPhongGouraud"
+﻿Shader "CG/BlinnPhong"
 {
     Properties
     {
@@ -11,7 +11,7 @@
     {
         Pass
         {
-            Tags { "LightMode" = "ForwardBase" } 
+            Tags { "LightMode" = "ForwardBase" }
 
             CGPROGRAM
 
