@@ -52,26 +52,16 @@
                 {
                     // Calculate directions
                     float3 lightDirection = normalize(_WorldSpaceLightPos0);
-                    float3 viewDirection = normalize(_WorldSpaceCameraPos 
-                                           - 
-                                           mul(unity_ObjectToWorld, input.pos));
                     float3 normalDirection = normalize(input.normalDirection);
 
                     // Calculate illuminated colors
                     fixed4 color_a = _LightColor0 * _AmbientColor;
-                    fixed4 color_d = _LightColor0 * _DiffuseColor * 
+                    fixed4 color_d = _LightColor0 * _DiffuseColor *
                                                 max(0, dot(normalDirection, lightDirection));
-                    fixed4 color_s = fixed4(0.0, 0.0, 0.0, 0.0);
 
-                    // Specular color defined relative to the light source
-                    //   Highlights can be seen only within faces that face light source
-                    if (dot(normalDirection, lightDirection) >= 0)
-                    {
-                        float3 h = normalize((lightDirection + normalize(_WorldSpaceCameraPos)) / 2);
-
-                        color_s = _SpecularColor * _LightColor0 * 
-                                            pow(max(dot(normalDirection, h), 0), _Shininess);
-                    }
+                    float3 h = normalize((lightDirection + normalize(_WorldSpaceCameraPos)) / 2);
+                    fixed4 color_s = _LightColor0 * _SpecularColor *
+                                        pow(max(dot(normalDirection, h), 0), _Shininess);
 
                     return color_a + color_d + color_s;
                 }
