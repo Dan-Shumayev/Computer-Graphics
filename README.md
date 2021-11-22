@@ -25,7 +25,7 @@
         - Following that, we now have the local transform' *M* describing the joint in local space orientation. However, we would like to get this joint in global space orientation, which is achievable by pre-multiplying *M* by all its parents' global transform' (the first global one is the *Root Joint* which in turn lets its children (one by one) yield their global transform' as well, by pre-multiplying by the root's transform').
 </details>
 <details>
-<summary><code>Project 2</code> - <b>...</b></summary>
+<summary><code>Project 2</code> - <b>Rendering Pipeline - Mesh Processing, Shading and Lighting</b></summary>
 
-- 
+- In this exercise we'll use *OBJ* files to draw and shade *meshes*.
 </details>
