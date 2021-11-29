@@ -121,7 +121,60 @@ public static class CatmullClark
     // Returns a list of new locations of the original points for the given CCMeshData, as described in the CC algorithm 
     public static List<Vector3> GetNewPoints(CCMeshData mesh)
     {
-        return null;
+        List<HashSet<int>> vertexEdges = GetVertexEdges(mesh);
+
+        IEnumerable<Vector3> Generate()
+        {
+            for (var vertexIndex = 0; vertexIndex < vertexEdges.Count; ++vertexIndex)
+            {
+                int n = vertexEdges[vertexIndex].Count;
+
+                List<Vector3> neighboringFacePoints = vertexEdges[vertexIndex]
+                    .SelectMany(edgeIndex => new[] { (int)mesh.edges[edgeIndex].z, (int)mesh.edges[edgeIndex].w })
+                    .Where(faceIndex => faceIndex != -1)
+                    .Distinct()
+                    .Select(faceIndex => mesh.facePoints[faceIndex])
+                    .ToList();
+                Debug.Assert(neighboringFacePoints.Count == n);
+
+                Vector3 f = neighboringFacePoints.Aggregate((a, b) => a + b) / neighboringFacePoints.Count;
+
+                List<Vector3> neighboringEdgeMidpoints = vertexEdges[vertexIndex]
+                    .Select(edgeIndex =>
+                        (mesh.points[(int)mesh.edges[edgeIndex].x] + mesh.points[(int)mesh.edges[edgeIndex].y]) / 2)
+                    .ToList();
+                Debug.Assert(neighboringEdgeMidpoints.Count == n);
+
+                Vector3 r = neighboringEdgeMidpoints.Aggregate((a, b) => a + b) / neighboringEdgeMidpoints.Count;
+
+                yield return (f + 2 * r + (n - 3) * mesh.points[vertexIndex]) / n;
+            }
+        }
+
+        return Generate().ToList();
+    }
+
+    private static List<HashSet<int>> GetVertexEdges(CCMeshData mesh)
+    {
+        var vertexEdges = new SortedDictionary<int, HashSet<int>>();
+
+        void AddVertexAndEdge(int vertexIndex, int edgeIndex)
+        {
+            if (!vertexEdges.ContainsKey(vertexIndex))
+            {
+                vertexEdges.Add(vertexIndex, new HashSet<int>());
+            }
+
+            vertexEdges[vertexIndex].Add(edgeIndex);
+        }
+
+        for (var edgeIndex = 0; edgeIndex < mesh.edges.Count; ++edgeIndex)
+        {
+            AddVertexAndEdge((int)mesh.edges[edgeIndex].x, edgeIndex);
+            AddVertexAndEdge((int)mesh.edges[edgeIndex].y, edgeIndex);
+        }
+
+        return vertexEdges.Values.ToList();
     }
 }
 
