@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -41,7 +42,35 @@ public static class CatmullClark
     // f1, f2 are faces incident to the edge. If the edge belongs to one face only, f2 is -1
     public static List<Vector4> GetEdges(CCMeshData mesh)
     {
-        return null;
+        var edgeFaces = new Dictionary<Edge, Vector4>();
+
+        void AddEdgeAndFace(Edge edge, int faceIndex)
+        {
+            if (!edgeFaces.ContainsKey(edge))
+            {
+                edgeFaces.Add(edge, new Vector4(edge.Start, edge.End, faceIndex, -1));
+                return;
+            }
+
+            Vector4 edgeAndFaces = edgeFaces[edge];
+
+            Debug.Assert((int)edgeAndFaces.w == -1);
+            edgeAndFaces.w = faceIndex;
+
+            edgeFaces[edge] = edgeAndFaces;
+        }
+
+        for (var faceIndex = 0; faceIndex < mesh.faces.Count; ++faceIndex)
+        {
+            Vector4 faceVertices = mesh.faces[faceIndex];
+
+            AddEdgeAndFace(new Edge((int)faceVertices[0], (int)faceVertices[1]), faceIndex);
+            AddEdgeAndFace(new Edge((int)faceVertices[1], (int)faceVertices[2]), faceIndex);
+            AddEdgeAndFace(new Edge((int)faceVertices[2], (int)faceVertices[3]), faceIndex);
+            AddEdgeAndFace(new Edge((int)faceVertices[3], (int)faceVertices[0]), faceIndex);
+        }
+
+        return edgeFaces.Values.ToList();
     }
 
     // Returns a list of "face points" for the given CCMeshData, as described in the Catmull-Clark algorithm 
@@ -60,5 +89,33 @@ public static class CatmullClark
     public static List<Vector3> GetNewPoints(CCMeshData mesh)
     {
         return null;
+    }
+}
+
+internal readonly struct Edge : IEquatable<Edge>
+{
+    public Edge(int start, int end)
+    {
+        Start = start;
+        End = end;
+    }
+
+    public int Start { get; }
+
+    public int End { get; }
+
+    public bool Equals(Edge other)
+    {
+        return (Start == other.Start && End == other.End) || (Start == other.End && End == other.Start);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is Edge other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return Start ^ End;
     }
 }
