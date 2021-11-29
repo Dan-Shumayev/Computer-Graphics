@@ -76,7 +76,20 @@ public static class CatmullClark
     // Returns a list of "face points" for the given CCMeshData, as described in the Catmull-Clark algorithm 
     public static List<Vector3> GetFacePoints(CCMeshData mesh)
     {
-        return null;
+        IEnumerable<Vector3> Generate()
+        {
+            foreach (Vector4 face in mesh.faces)
+            {
+                Vector3 a = mesh.points[(int)face.x];
+                Vector3 b = mesh.points[(int)face.y];
+                Vector3 c = mesh.points[(int)face.z];
+                Vector3 d = mesh.points[(int)face.w];
+
+                yield return (a + b + c + d) / 4;
+            }
+        }
+
+        return Generate().ToList();
     }
 
     // Returns a list of "edge points" for the given CCMeshData, as described in the Catmull-Clark algorithm 
