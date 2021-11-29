@@ -36,21 +36,29 @@ public static class CatmullClark
 
         var newFaces = new List<Vector4>();
 
+        // Calculates the vertices of a new face in the subdivided mesh,
+        // given the index of a face in the original mesh and the indices of two of the face's
+        // edges.
         void AddNewFace(int originalFaceIndex, int firstEdgeIndex, int secondEdgeIndex)
         {
+            // The face points list is parallel to the faces list.
             int facePointIndex = originalFaceIndex;
+
+            // The edge points list is parallel to the edges list.
             int firstEdgePointIndex = firstEdgeIndex + meshData.facePoints.Count;
             int secondEdgePointIndex = secondEdgeIndex + meshData.facePoints.Count;
 
             Vector4 firstEdge = meshData.edges[firstEdgeIndex];
             Vector4 secondEdge = meshData.edges[secondEdgeIndex];
 
+            // The original point is the common point of the two given edges
             int originalPointIndex = new[] { (int)firstEdge.x, (int)firstEdge.y }
                 .Intersect(new[] { (int)secondEdge.x, (int)secondEdge.y })
                 .First();
 
             int newPointIndex = originalPointIndex + meshData.facePoints.Count + meshData.edgePoints.Count;
 
+            // We have the indices of all points, so now we can construct the face by going clockwise.
             newFaces.Add(new Vector4(newPointIndex, secondEdgePointIndex, facePointIndex, firstEdgePointIndex));
         }
 
@@ -153,22 +161,25 @@ public static class CatmullClark
     {
         List<HashSet<int>> vertexEdges = GetVertexEdges(mesh);
 
+        // The new point derivation algorithm as seen in the TA
         IEnumerable<Vector3> Generate()
         {
             for (var vertexIndex = 0; vertexIndex < vertexEdges.Count; ++vertexIndex)
             {
                 int n = vertexEdges[vertexIndex].Count;
 
+                // Find the neighboring face points of a vertex:
                 List<Vector3> neighboringFacePoints = vertexEdges[vertexIndex]
                     .SelectMany(edgeIndex => new[] { (int)mesh.edges[edgeIndex].z, (int)mesh.edges[edgeIndex].w })
-                    .Where(faceIndex => faceIndex != -1)
-                    .Distinct()
-                    .Select(faceIndex => mesh.facePoints[faceIndex])
+                    .Where(faceIndex => faceIndex != -1) // 1. Map each incident edge to its neighboring faces
+                    .Distinct() // 2. No need to count faces twice
+                    .Select(faceIndex => mesh.facePoints[faceIndex]) // 3. Map each face to its face point
                     .ToList();
                 Debug.Assert(neighboringFacePoints.Count == n);
 
                 Vector3 f = neighboringFacePoints.Aggregate((a, b) => a + b) / neighboringFacePoints.Count;
 
+                // Find the midpoints of all incident edges
                 List<Vector3> neighboringEdgeMidpoints = vertexEdges[vertexIndex]
                     .Select(edgeIndex =>
                         (mesh.points[(int)mesh.edges[edgeIndex].x] + mesh.points[(int)mesh.edges[edgeIndex].y]) / 2)
@@ -186,7 +197,7 @@ public static class CatmullClark
 
     /// <summary>
     /// For each face in <paramref name="mesh"/>, returns the indices in
-    /// the <see cref="CCMeshData.edges"/> array of the face's edges.
+    /// the <see cref="CCMeshData.edges"/> list of the face's edges.
     /// </summary>
     /// <param name="mesh">Mesh to operate on</param>
     /// <returns>2D array, with the first dimension containing the indices of faces,
@@ -228,6 +239,11 @@ public static class CatmullClark
         return faceEdges;
     }
 
+    /// <summary>
+    /// For each vertex in <paramref name="mesh"/>, returns the indices in
+    /// the <see cref="CCMeshData.edges"/> list of the vertex's incident edges.
+    /// </summary>
+    /// <param name="mesh">Mesh to operate on</param>
     private static List<HashSet<int>> GetVertexEdges(CCMeshData mesh)
     {
         var vertexEdges = new SortedDictionary<int, HashSet<int>>();
