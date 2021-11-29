@@ -31,9 +31,65 @@ public static class CatmullClark
 
         // Combine facePoints, edgePoints and newPoints into a subdivided QuadMeshData
 
-        // Your implementation here...
+        List<Vector3> allNewPoints =
+            meshData.facePoints.Concat(meshData.edgePoints).Concat(meshData.newPoints).ToList();
 
-        return new QuadMeshData();
+        List<int[]> faceEdges = GetFaceEdges(meshData)
+            .Select((edgeIndices, faceIndex) =>
+            {
+                Vector4 faceVertices = meshData.faces[faceIndex];
+                var temp = new Dictionary<Edge, int[]>()
+                {
+                    [new Edge((int)faceVertices[0], (int)faceVertices[1])] = new[] { 0, -1 },
+                    [new Edge((int)faceVertices[1], (int)faceVertices[2])] = new[] { 1, -1 },
+                    [new Edge((int)faceVertices[2], (int)faceVertices[3])] = new[] { 2, -1 },
+                    [new Edge((int)faceVertices[3], (int)faceVertices[0])] = new[] { 3, -1 },
+                };
+
+                foreach (int edgeIndex in edgeIndices)
+                {
+                    Vector4 edge = meshData.edges[edgeIndex];
+                    temp[new Edge((int)edge.x, (int)edge.y)][1] = edgeIndex;
+                }
+
+                var sortedEdges = new int[4];
+                foreach (int[] pair in temp.Values)
+                {
+                    sortedEdges[pair[0]] = pair[1];
+                }
+
+                return sortedEdges;
+            }).ToList();
+
+        var newFaces = new List<Vector4>();
+
+        void AddNewFace(int originalFaceIndex, int firstEdgeIndex, int secondEdgeIndex)
+        {
+            int facePointIndex = originalFaceIndex;
+            int firstEdgePointIndex = firstEdgeIndex + meshData.facePoints.Count;
+            int secondEdgePointIndex = secondEdgeIndex + meshData.facePoints.Count;
+
+            Vector4 firstEdge = meshData.edges[firstEdgeIndex];
+            Vector4 secondEdge = meshData.edges[secondEdgeIndex];
+
+            int originalPointIndex = new[] { (int)firstEdge.x, (int)firstEdge.y }
+                .Intersect(new[] { (int)secondEdge.x, (int)secondEdge.y })
+                .First();
+
+            int newPointIndex = originalPointIndex + meshData.facePoints.Count + meshData.edgePoints.Count;
+
+            newFaces.Add(new Vector4(newPointIndex, secondEdgePointIndex, facePointIndex, firstEdgePointIndex));
+        }
+
+        for (var faceIndex = 0; faceIndex < faceEdges.Count; ++faceIndex)
+        {
+            AddNewFace(faceIndex, faceEdges[faceIndex][0], faceEdges[faceIndex][1]);
+            AddNewFace(faceIndex, faceEdges[faceIndex][1], faceEdges[faceIndex][2]);
+            AddNewFace(faceIndex, faceEdges[faceIndex][2], faceEdges[faceIndex][3]);
+            AddNewFace(faceIndex, faceEdges[faceIndex][3], faceEdges[faceIndex][0]);
+        }
+
+        return new QuadMeshData(allNewPoints, newFaces);
     }
 
     // Returns a list of all edges in the mesh defined by given points and faces.
@@ -152,6 +208,33 @@ public static class CatmullClark
         }
 
         return Generate().ToList();
+    }
+
+    private static IEnumerable<HashSet<int>> GetFaceEdges(CCMeshData mesh)
+    {
+        var faceEdges = new SortedDictionary<int, HashSet<int>>();
+
+        void AddFaceAndEdge(int faceIndex, int edgeIndex)
+        {
+            if (!faceEdges.ContainsKey(faceIndex))
+            {
+                faceEdges.Add(faceIndex, new HashSet<int>());
+            }
+
+            faceEdges[faceIndex].Add(edgeIndex);
+        }
+
+        for (var edgeIndex = 0; edgeIndex < mesh.edges.Count; ++edgeIndex)
+        {
+            AddFaceAndEdge((int)mesh.edges[edgeIndex].z, edgeIndex);
+
+            if ((int)mesh.edges[edgeIndex].w != -1)
+            {
+                AddFaceAndEdge((int)mesh.edges[edgeIndex].w, edgeIndex);
+            }
+        }
+
+        return faceEdges.Values;
     }
 
     private static List<HashSet<int>> GetVertexEdges(CCMeshData mesh)
