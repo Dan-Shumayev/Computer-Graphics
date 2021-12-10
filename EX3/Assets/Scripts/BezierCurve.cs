@@ -23,15 +23,10 @@ public class BezierCurve : MonoBehaviour
     {
         Debug.Assert(0.0f <= t && t <= 1.0f);
 
-        float BezierPointCoord(int coordIndex)
-        {
-            return Mathf.Pow(1.0f - t, 3.0f) * p0[coordIndex] +
-                    3.0f * Mathf.Pow(1.0f - t, 2.0f) * t * p1[coordIndex] +
-                    3.0f * (1.0f - t) * Mathf.Pow(t, 2.0f) * p2[coordIndex] +
-                    Mathf.Pow(t, 3.0f) * p3[coordIndex];
-        }
-
-        return new Vector3(BezierPointCoord(X), BezierPointCoord(Y), BezierPointCoord(Z));
+        return Mathf.Pow(1.0f - t, 3.0f) * p0 +
+                3.0f * Mathf.Pow(1.0f - t, 2.0f) * t * p1 +
+                3.0f * (1.0f - t) * Mathf.Pow(t, 2.0f) * p2 +
+                Mathf.Pow(t, 3.0f) * p3;
     }
 
     // Returns first derivative B'(t) for given parameter 0 <= t <= 1
@@ -39,14 +34,9 @@ public class BezierCurve : MonoBehaviour
     {
         Debug.Assert(0.0f <= t && t <= 1.0f);
 
-        float BezierDerivPointCoord(int coordIndex)
-        {
-            return -3.0f * (Mathf.Pow(1.0f - t, 2.0f) * p0[coordIndex] +
-                    (-3.0f * Mathf.Pow(t, 2.0f) + 4.0f * t - 1.0f) * p1[coordIndex] +
-                    (3.0f * t * p2[coordIndex] - 2 * p2[coordIndex] - p3[coordIndex] * t) * t);
-        }
-
-        return new Vector3(BezierDerivPointCoord(X), BezierDerivPointCoord(Y), BezierDerivPointCoord(Z));
+        return -3.0f * (Mathf.Pow(1.0f - t, 2.0f) * p0 +
+                (-3.0f * Mathf.Pow(t, 2.0f) + 4.0f * t - 1.0f) * p1 +
+                (3.0f * t * p2 - 2 * p2 - p3 * t) * t);
     }
 
     // Returns second derivative B''(t) for given parameter 0 <= t <= 1
@@ -54,16 +44,11 @@ public class BezierCurve : MonoBehaviour
     {
         Debug.Assert(0.0f <= t && t <= 1.0f);
 
-        float BezierSecDerivPointCoord(int coordIndex)
-        {
-            return -6.0f * (-p0[coordIndex] * (1.0f - t) +
-                            p1[coordIndex] * (2.0f - 3.0f * t) +
-                            3.0f * p2[coordIndex] * t -
-                            p2[coordIndex] -
-                            p3[coordIndex] * t);
-        }
-
-        return new Vector3(BezierSecDerivPointCoord(X), BezierSecDerivPointCoord(Y), BezierSecDerivPointCoord(Z));
+        return -6.0f * (-p0 * (1.0f - t) +
+                        p1 * (2.0f - 3.0f * t) +
+                        3.0f * p2 * t -
+                        p2 -
+                        p3 * t);
     }
 
     // Returns the tangent vector to the curve at point B(t) for a given 0 <= t <= 1
@@ -123,6 +108,7 @@ public class BezierCurve : MonoBehaviour
     // Update the curve and send a message to other components on the GameObject
     public void Refresh()
     {
+        GetSecondDerivative(0.6f);
         CalcCumLengths();
         if (Application.isPlaying)
         {
