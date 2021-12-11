@@ -24,8 +24,8 @@ public class BezierMesh : MonoBehaviour
     {
         QuadMeshData meshData = new QuadMeshData();
 
-        List<float> samplePointSteps = Enumerable.Range(0, numSteps + 1).Select(stepIdx => (float)stepIdx / numSteps).ToList();
-        List<Vector3> samplePoints = samplePointSteps.Select(step => curve.GetPoint(step)).ToList();
+        List<float> samplePointSteps = GetSampleSteps(numSteps);
+        List<Vector3> samplePoints = GetSamplePoints(curve, numSteps);
 
         foreach (var tuple in samplePoints.Zip(samplePointSteps, (x, y) => (Point: x, Param: y)))
         {
@@ -53,6 +53,16 @@ public class BezierMesh : MonoBehaviour
         }
 
         return meshData.ToUnityMesh();
+    }
+
+    public static List<float> GetSampleSteps(int numSteps)
+    {
+        return Enumerable.Range(0, numSteps + 1).Select(stepIdx => (float)stepIdx / numSteps).ToList();
+    }
+
+    public static List<Vector3> GetSamplePoints(BezierCurve curve, int numSteps)
+    {
+        return GetSampleSteps(numSteps).Select(step => curve.GetPoint(step)).ToList();
     }
 
     // Returns 2D coordinates of a point on the unit circle at a given angle from the x-axis

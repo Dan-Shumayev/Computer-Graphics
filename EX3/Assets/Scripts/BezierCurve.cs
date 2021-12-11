@@ -80,7 +80,28 @@ public class BezierCurve : MonoBehaviour
     // Calculates the arc-lengths lookup table
     public void CalcCumLengths()
     {
-        // Your implementation here...
+        int numOfSampleLengths = numSteps + 1; // Amount of entries in LUT
+
+        List<Vector3> samplePoints = BezierMesh.GetSamplePoints(this, numOfSampleLengths);
+        cumLengths = new float[numOfSampleLengths]; // Initialize zeroed
+
+        int idx = 1;
+        foreach (float cumSum in CumulativeMagnitudeSum(samplePoints, numOfSampleLengths))
+        {
+            cumLengths[idx++] = cumSum;
+        }
+    }
+
+    private IEnumerable<float> CumulativeMagnitudeSum(List<Vector3> samplePoints, int numOfSampleLengths)
+    {
+        float cumSum = 0.0f;
+
+        foreach (var idx in Enumerable.Range(1, numOfSampleLengths))
+        {
+            cumSum += (samplePoints[idx] - samplePoints[idx - 1]).magnitude;
+
+            yield return cumSum;
+        }
     }
 
     // Returns the total arc-length of the Bezier curve
