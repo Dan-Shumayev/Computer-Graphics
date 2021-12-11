@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
 
 
 public class BezierCurve : MonoBehaviour
@@ -113,7 +114,23 @@ public class BezierCurve : MonoBehaviour
     // Returns approximate t s.t. the arc-length to B(t) = arcLength
     public float ArcLengthToT(float a)
     {
-        return 0;
+        if (cumLengths.Contains(a))
+        {
+            return (float)Array.IndexOf(cumLengths, a) / numSteps;
+        }
+
+        foreach (float iLength in cumLengths)
+        {
+            if (iLength <= a)
+            {
+                int i = Array.IndexOf(cumLengths, iLength);
+
+                return Mathf.Lerp((float)i / numSteps, (float)(i + 1) / numSteps,
+                                  Mathf.InverseLerp(iLength, cumLengths[i + 1], a));
+            }
+        }
+
+        return -1.0f; // `a` is strictly greater than all the cumLengths
     }
 
     // Start is called before the first frame update
