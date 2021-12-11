@@ -107,7 +107,7 @@ public class BezierCurve : MonoBehaviour
     // Returns the total arc-length of the Bezier curve
     public float ArcLength()
     {
-        return 0;
+        return cumLengths[numSteps];
     }
 
     // Returns approximate t s.t. the arc-length to B(t) = arcLength
