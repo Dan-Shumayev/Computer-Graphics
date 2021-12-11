@@ -60,7 +60,7 @@ public class BezierCurve : MonoBehaviour
     {
         Debug.Assert(0.0f <= t && t <= 1.0f);
 
-        return Vector3.Cross(GetTangent(t), GetBinormal(t));
+        return Vector3.Cross(GetTangent(t), GetBinormal(t)).normalized;
     }
 
     // Returns the Frenet binormal to the curve at point B(t) for a given 0 <= t <= 1
@@ -74,7 +74,7 @@ public class BezierCurve : MonoBehaviour
         Vector3 infinitesimalCloseVelocity = velocityVec + accelerationVec;
         Vector3 infinitesimalCloseTangent = infinitesimalCloseVelocity.normalized;
 
-        return Vector3.Cross(velocityVec.normalized, infinitesimalCloseTangent);
+        return Vector3.Cross(velocityVec.normalized, infinitesimalCloseTangent).normalized;
     }
 
     // Calculates the arc-lengths lookup table
@@ -104,7 +104,6 @@ public class BezierCurve : MonoBehaviour
     // Update the curve and send a message to other components on the GameObject
     public void Refresh()
     {
-        GetSecondDerivative(0.6f);
         CalcCumLengths();
         if (Application.isPlaying)
         {
