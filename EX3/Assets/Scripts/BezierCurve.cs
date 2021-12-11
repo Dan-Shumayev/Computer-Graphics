@@ -14,10 +14,6 @@ public class BezierCurve : MonoBehaviour
     private float[] cumLengths; // Cumulative lengths lookup table
     private readonly int numSteps = 128; // Number of points to sample for the cumLengths LUT
 
-    private readonly static int X = 0;
-    private readonly static int Y = 0;
-    private readonly static int Z = 0;
-
     // Returns position B(t) on the Bezier curve for given parameter 0 <= t <= 1
     public Vector3 GetPoint(float t)
     {
