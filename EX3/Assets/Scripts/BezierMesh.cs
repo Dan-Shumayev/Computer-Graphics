@@ -24,7 +24,33 @@ public class BezierMesh : MonoBehaviour
     {
         QuadMeshData meshData = new QuadMeshData();
 
-        // Your implementation here...
+        List<float> samplePointSteps = Enumerable.Range(0, numSteps + 1).Select(stepIdx => (float)stepIdx / numSteps).ToList();
+        List<Vector3> samplePoints = samplePointSteps.Select(step => curve.GetPoint(step)).ToList();
+
+        foreach (var tuple in samplePoints.Zip(samplePointSteps, (x, y) => (Point: x, Param: y)))
+        {
+            meshData.vertices.AddRange(Enumerable.Range(0, numSides)
+                                .Select(sideIdx => (float)(360.0f / numSides) * sideIdx)
+                                .Select(deg => GetUnitCirclePoint(deg))
+                                .Select(circlePoint => (circlePoint[0] * curve.GetBinormal(tuple.Param) + circlePoint[1] * curve.GetNormal(tuple.Param)).normalized)
+                                .Select(circlePointDir =>
+                                                        tuple.Point +
+                                                        circlePointDir * radius));
+        }
+
+        for (int stepIdx = 0; stepIdx < numSteps; ++stepIdx)
+        {
+            int currStep = stepIdx * numSides;
+            int incToNextStep = numSides;
+
+            meshData.quads.AddRange(Enumerable.Range(0, numSides)
+                                    .Select(circlePointIdx =>
+                                        new Vector4(circlePointIdx + currStep,
+                                        circlePointIdx + currStep + incToNextStep,
+                                        currStep + incToNextStep + (circlePointIdx + 1) % numSides,
+                                        currStep + (circlePointIdx + 1) % numSides)
+                                        ));
+        }
 
         return meshData.ToUnityMesh();
     }
