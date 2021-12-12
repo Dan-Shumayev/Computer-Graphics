@@ -41,21 +41,37 @@ Shader "CG/Bricks"
 
                 struct v2f
                 {
-                    float4 pos : SV_POSITION;
-                    float2 uv  : TEXCOORD0;
+                    float4 pos    : SV_POSITION;
+                    float3 normal : NORMAL;
+                    float2 uv     : TEXCOORD0;
                 };
 
                 v2f vert (appdata input)
                 {
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
+                    output.normal = normalize(mul(unity_ObjectToWorld, input.normal));
                     output.uv = input.uv;
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return tex2D(_AlbedoMap, input.uv);
+                    float3 n = normalize(input.normal);
+                    float3 l = normalize(_WorldSpaceLightPos0);
+                    float3 h = normalize((l + normalize(_WorldSpaceCameraPos)) / 2);
+
+                    fixed3 color = blinnPhong(n,
+                                              h,
+                                              l,
+                                              _Shininess,
+                                              tex2D(_AlbedoMap, input.uv),
+                                              tex2D(_SpecularMap, input.uv),
+                                              _Ambient);
+
+                    // TODO: Not sure about setting the alpha to 1 here.
+                    //       Maybe blinnPhong should actually return fixed4 and not fixed3?
+                    return fixed4(color, 1);
                 }
 
             ENDCG
