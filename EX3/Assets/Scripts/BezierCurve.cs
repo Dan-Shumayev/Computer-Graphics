@@ -83,6 +83,10 @@ public class BezierCurve : MonoBehaviour
         cumLengths = CumulativeMagnitudeSum(samplePoints).ToArray();
     }
 
+    /// <summary>
+    /// Enumerates <paramref name="count"/> evenly-spaced points along the curve.
+    /// </summary>
+    /// <param name="count">The number of points to sample</param>
     private IEnumerable<Vector3> GetSamplePoints(int count)
     {
         for (var step = 0; step < count; ++step)
@@ -91,6 +95,11 @@ public class BezierCurve : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the cumulative sums of the distances between the given points:
+    /// 0, p2 - p1, p3 - p2, p4 - p3, ...
+    /// </summary>
+    /// <param name="samplePoints">The points to operate on</param>
     private static IEnumerable<float> CumulativeMagnitudeSum(IReadOnlyList<Vector3> samplePoints)
     {
         float cumSum = 0;
