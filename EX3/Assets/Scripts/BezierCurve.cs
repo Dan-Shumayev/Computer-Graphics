@@ -81,7 +81,7 @@ public class BezierCurve : MonoBehaviour
     {
         int numOfSampleLengths = numSteps + 1; // Amount of entries in LUT
 
-        List<Vector3> samplePoints = BezierMesh.GetSamplePoints(this, numOfSampleLengths);
+        List<Vector3> samplePoints = GetSamplePoints(numOfSampleLengths);
         cumLengths = new float[numOfSampleLengths]; // Initialize zeroed
 
         int idx = 1;
@@ -154,5 +154,10 @@ public class BezierCurve : MonoBehaviour
         p3 = new Vector3(-1f, 0f, 1f);
 
         Refresh();
+    }
+
+    public List<Vector3> GetSamplePoints(int count)
+    {
+        return BezierMesh.GetSampleSteps(count).Select(GetPoint).ToList();
     }
 }
