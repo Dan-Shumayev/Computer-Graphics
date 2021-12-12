@@ -112,21 +112,36 @@ public class BezierCurve : MonoBehaviour
     // Returns approximate t s.t. the arc-length to B(t) = arcLength
     public float ArcLengthToT(float a)
     {
-        if (cumLengths.Contains(a))
-        {
-            return (float)Array.IndexOf(cumLengths, a) / numSteps;
-        }
+        Debug.Assert(a >= 0);
+        Debug.Assert(a <= ArcLength());
 
-        for (int idx = 0; idx < numSteps; ++idx)
+        int index = Array.BinarySearch(cumLengths, a);
+        if (index < 0)
         {
-            if (cumLengths[idx] <= a && a <= cumLengths[idx + 1])
+            index = ~index;
+            if (index == 0)
             {
-                return Mathf.Lerp((float)idx / numSteps, (float)(idx + 1) / numSteps,
-                                  Mathf.InverseLerp(cumLengths[idx], cumLengths[idx + 1], a));
+                // a is smaller than all elements in the array, but a >= 0?
+                // HOW?!
+                Debug.Assert(false);
+                return float.NaN;
+            }
+            else if (index == cumLengths.Length)
+            {
+                // a is larger than all elements in the array, but a <= ArcLength()?
+                // HOW?!
+                Debug.Assert(false);
+                return float.NaN;
+            }
+            else
+            {
+                --index;
             }
         }
 
-        return -1.0f; // `a` is either strictly greater or smaller than all the cumLengths
+        float tInterpolation = Mathf.InverseLerp(cumLengths[index], cumLengths[index + 1], a);
+        float t = Mathf.Lerp((float)index / numSteps, (float)(index + 1) / numSteps, tInterpolation);
+        return t;
     }
 
     // Start is called before the first frame update
