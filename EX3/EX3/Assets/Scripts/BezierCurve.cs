@@ -3,7 +3,6 @@ using System.Linq;
 using UnityEngine;
 using System;
 
-
 public class BezierCurve : MonoBehaviour
 {
     // Bezier control points
@@ -119,18 +118,16 @@ public class BezierCurve : MonoBehaviour
             return (float)Array.IndexOf(cumLengths, a) / numSteps;
         }
 
-        foreach (float iLength in cumLengths)
+        for (int idx = 0; idx < numSteps; ++idx)
         {
-            if (iLength <= a)
+            if (cumLengths[idx] <= a && a <= cumLengths[idx + 1])
             {
-                int i = Array.IndexOf(cumLengths, iLength);
-
-                return Mathf.Lerp((float)i / numSteps, (float)(i + 1) / numSteps,
-                                  Mathf.InverseLerp(iLength, cumLengths[i + 1], a));
+                return Mathf.Lerp((float)idx / numSteps, (float)(idx + 1) / numSteps,
+                                  Mathf.InverseLerp(cumLengths[idx], cumLengths[idx + 1], a));
             }
         }
 
-        return -1.0f; // `a` is strictly greater than all the cumLengths
+        return -1.0f; // `a` is either strictly greater or smaller than all the cumLengths
     }
 
     // Start is called before the first frame update
