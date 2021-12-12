@@ -17,40 +17,39 @@ public class BezierCurve : MonoBehaviour
     // Returns position B(t) on the Bezier curve for given parameter 0 <= t <= 1
     public Vector3 GetPoint(float t)
     {
-        Debug.Assert(0.0f <= t && t <= 1.0f);
+        Debug.Assert(0 <= t && t <= 1);
 
-        return Mathf.Pow(1.0f - t, 3.0f) * p0 +
-                3.0f * Mathf.Pow(1.0f - t, 2.0f) * t * p1 +
-                3.0f * (1.0f - t) * Mathf.Pow(t, 2.0f) * p2 +
-                Mathf.Pow(t, 3.0f) * p3;
+        return Mathf.Pow(1 - t, 3) * p0
+               + 3 * Mathf.Pow(1 - t, 2) * t * p1
+               + 3 * (1 - t) * Mathf.Pow(t, 2) * p2
+               + Mathf.Pow(t, 3) * p3;
     }
 
     // Returns first derivative B'(t) for given parameter 0 <= t <= 1
     public Vector3 GetFirstDerivative(float t)
     {
-        Debug.Assert(0.0f <= t && t <= 1.0f);
+        Debug.Assert(0 <= t && t <= 1);
 
-        return -3.0f * (Mathf.Pow(1.0f - t, 2.0f) * p0 +
-                (-3.0f * Mathf.Pow(t, 2.0f) + 4.0f * t - 1.0f) * p1 +
-                (3.0f * t * p2 - 2 * p2 - p3 * t) * t);
+        // https://en.wikipedia.org/w/index.php?title=B%C3%A9zier_curve&oldid=1058020248#Cubic_B%C3%A9zier_curves
+        return 3 * Mathf.Pow(1 - t, 2) * (p1 - p0)
+               + 6 * (1 - t) * t * (p2 - p1)
+               + 3 * Mathf.Pow(t, 2) * (p3 - p2);
     }
 
     // Returns second derivative B''(t) for given parameter 0 <= t <= 1
     public Vector3 GetSecondDerivative(float t)
     {
-        Debug.Assert(0.0f <= t && t <= 1.0f);
+        Debug.Assert(0 <= t && t <= 1);
 
-        return -6.0f * (-p0 * (1.0f - t) +
-                        p1 * (2.0f - 3.0f * t) +
-                        3.0f * p2 * t -
-                        p2 -
-                        p3 * t);
+        https://en.wikipedia.org/w/index.php?title=B%C3%A9zier_curve&oldid=1058020248#Cubic_B%C3%A9zier_curves
+        return 6 * (1 - t) * (p2 - 2 * p1 + p0)
+               + 6 * t * (p3 - 2 * p2 + p1);
     }
 
     // Returns the tangent vector to the curve at point B(t) for a given 0 <= t <= 1
     public Vector3 GetTangent(float t)
     {
-        Debug.Assert(0.0f <= t && t <= 1.0f);
+        Debug.Assert(0 <= t && t <= 1);
 
         return GetFirstDerivative(t).normalized;
     }
@@ -58,7 +57,7 @@ public class BezierCurve : MonoBehaviour
     // Returns the Frenet normal to the curve at point B(t) for a given 0 <= t <= 1
     public Vector3 GetNormal(float t)
     {
-        Debug.Assert(0.0f <= t && t <= 1.0f);
+        Debug.Assert(0 <= t && t <= 1);
 
         return Vector3.Cross(GetTangent(t), GetBinormal(t)).normalized;
     }
@@ -66,7 +65,7 @@ public class BezierCurve : MonoBehaviour
     // Returns the Frenet binormal to the curve at point B(t) for a given 0 <= t <= 1
     public Vector3 GetBinormal(float t)
     {
-        Debug.Assert(0.0f <= t && t <= 1.0f);
+        Debug.Assert(0 <= t && t <= 1);
 
         Vector3 velocityVec = GetFirstDerivative(t);
         Vector3 accelerationVec = GetSecondDerivative(t);
