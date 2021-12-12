@@ -36,8 +36,22 @@ fixed3 blinnPhong(float3 n, float3 h, float3 l, float shininess, fixed4 albedo, 
 // Returns the world-space bump-mapped normal for the given bumpMapData
 float3 getBumpMappedNormal(bumpMapData i)
 {
-    // Your implementation
-    return 0;
+    float fp = tex2D(i.heightMap, i.uv);
+    float fu = (tex2D(i.heightMap, float2(i.uv.x + i.du, i.uv.y)) - fp) / i.du;
+    float fv = (tex2D(i.heightMap, float2(i.uv.x, i.uv.y + i.dv)) - fp) / i.dv;
+
+    float3 tu = float3(1, 0, i.bumpScale * fu);
+    float3 tv = float3(0, 1, i.bumpScale * fv);
+
+    // TODO: Negating the result (or changing the cross product order)
+    //       fixes the result. No idea why.
+	float3 nh = -normalize(cross(tv, tu));
+
+    float3 binormal = normalize(cross(i.tangent, i.normal));
+
+    float3 n_world = normalize(i.tangent * nh.x + i.normal * nh.z + binormal * nh.y);
+
+    return n_world;
 }
 
 

@@ -41,9 +41,10 @@ Shader "CG/Bricks"
 
                 struct v2f
                 {
-                    float4 pos    : SV_POSITION;
-                    float3 normal : NORMAL;
-                    float2 uv     : TEXCOORD0;
+                    float4 pos     : SV_POSITION;
+                    float3 normal  : NORMAL;
+                    float4 tangent : TANGENT;
+                    float2 uv      : TEXCOORD0;
                 };
 
                 v2f vert (appdata input)
@@ -51,17 +52,26 @@ Shader "CG/Bricks"
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
                     output.normal = normalize(mul(unity_ObjectToWorld, input.normal));
+                    output.tangent = normalize(mul(unity_ObjectToWorld, input.tangent));
                     output.uv = input.uv;
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    float3 n = normalize(input.normal);
                     float3 l = normalize(_WorldSpaceLightPos0);
                     float3 h = normalize((l + normalize(_WorldSpaceCameraPos)) / 2);
 
-                    fixed3 color = blinnPhong(n,
+                    bumpMapData bump;
+                    bump.normal = normalize(input.normal);
+                    bump.tangent = normalize(input.tangent);
+                    bump.uv = input.uv;
+                    bump.heightMap = _HeightMap;
+                    bump.du = _HeightMap_TexelSize[0];
+                    bump.dv = _HeightMap_TexelSize[1];
+                    bump.bumpScale = _BumpScale / 10000;
+
+                    fixed3 color = blinnPhong(getBumpMappedNormal(bump),
                                               h,
                                               l,
                                               _Shininess,
