@@ -26,7 +26,7 @@ public class Chain : MonoBehaviour
             Destroy(link);
         }
 
-        var numOfLinks = (int)(curve.ArcLength() / LinkSize);
+        int numOfLinks = (int)(curve.ArcLength() / LinkSize) + 1;
         for (var i = 0; i < numOfLinks; ++i)
         {
             float t = curve.ArcLengthToT((float)i * LinkSize);
