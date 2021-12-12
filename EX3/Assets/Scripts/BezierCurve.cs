@@ -41,7 +41,7 @@ public class BezierCurve : MonoBehaviour
     {
         Debug.Assert(0 <= t && t <= 1);
 
-        https://en.wikipedia.org/w/index.php?title=B%C3%A9zier_curve&oldid=1058020248#Cubic_B%C3%A9zier_curves
+        // https://en.wikipedia.org/w/index.php?title=B%C3%A9zier_curve&oldid=1058020248#Cubic_B%C3%A9zier_curves
         return 6 * (1 - t) * (p2 - 2 * p1 + p0)
                + 6 * t * (p3 - 2 * p2 + p1);
     }
@@ -79,8 +79,16 @@ public class BezierCurve : MonoBehaviour
     // Calculates the arc-lengths lookup table
     public void CalcCumLengths()
     {
-        List<Vector3> samplePoints = GetSamplePoints(numSteps + 1);
+        List<Vector3> samplePoints = GetSamplePoints(numSteps + 1).ToList();
         cumLengths = CumulativeMagnitudeSum(samplePoints).ToArray();
+    }
+
+    private IEnumerable<Vector3> GetSamplePoints(int count)
+    {
+        for (var step = 0; step < count; ++step)
+        {
+            yield return GetPoint((float)step / (count - 1));
+        }
     }
 
     private static IEnumerable<float> CumulativeMagnitudeSum(IReadOnlyList<Vector3> samplePoints)
@@ -163,15 +171,5 @@ public class BezierCurve : MonoBehaviour
         p3 = new Vector3(-1f, 0f, 1f);
 
         Refresh();
-    }
-
-    public static List<float> GetSampleSteps(int count)
-    {
-        return Enumerable.Range(0, count).Select(stepIdx => (float)stepIdx / (count - 1)).ToList();
-    }
-
-    public List<Vector3> GetSamplePoints(int count)
-    {
-        return GetSampleSteps(count).Select(GetPoint).ToList();
     }
 }
