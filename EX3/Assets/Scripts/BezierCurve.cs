@@ -171,8 +171,13 @@ public class BezierCurve : MonoBehaviour
         Refresh();
     }
 
+    public static List<float> GetSampleSteps(int count)
+    {
+        return Enumerable.Range(0, count).Select(stepIdx => (float)stepIdx / (count - 1)).ToList();
+    }
+
     public List<Vector3> GetSamplePoints(int count)
     {
-        return BezierMesh.GetSampleSteps(count).Select(GetPoint).ToList();
+        return GetSampleSteps(count).Select(GetPoint).ToList();
     }
 }
