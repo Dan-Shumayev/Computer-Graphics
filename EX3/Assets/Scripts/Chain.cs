@@ -26,22 +26,16 @@ public class Chain : MonoBehaviour
             Destroy(link);
         }
 
-        int numOfLinks = (int)(curve.ArcLength() / LinkSize);
-        float t = 0.0f;
-        for (int i = 0; i < numOfLinks; ++i)
+        var numOfLinks = (int)(curve.ArcLength() / LinkSize);
+        for (var i = 0; i < numOfLinks; ++i)
         {
-            t = curve.ArcLengthToT((float)i * LinkSize);
+            float t = curve.ArcLengthToT((float)i * LinkSize);
             Vector3 point = curve.GetPoint(t);
             Vector3 tangent = curve.GetTangent(t);
 
-            if (i % 2 == 0)
-            {
-                chainLinks.Add(CreateChainLink(point, tangent, curve.GetNormal(t)));
-            }
-            else
-            {
-                chainLinks.Add(CreateChainLink(point, tangent, curve.GetBinormal(t)));
-            }
+            chainLinks.Add(i % 2 == 0
+                ? CreateChainLink(point, tangent, curve.GetNormal(t))
+                : CreateChainLink(point, tangent, curve.GetBinormal(t)));
         }
     }
 
