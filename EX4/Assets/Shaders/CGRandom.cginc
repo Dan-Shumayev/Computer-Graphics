@@ -69,38 +69,48 @@ float triquinticInterpolation(float3 v[8], float3 t)
     return 0;
 }
 
+float4x4 cellCorners(float2 c)
+{
+    float2 cell_origin = floor(c);
+
+	return float4x4(
+        float4(cell_origin, 0, 0),
+        float4(float2(cell_origin.x + 1, cell_origin.y), 0, 0),
+        float4(float2(cell_origin.x, cell_origin.y + 1), 0, 0),
+        float4(cell_origin + 1, 0, 0)
+    );
+}
+
 // Returns the value of a 2D value noise function at the given coordinates c
 float value2d(float2 c)
 {
     // TODO: This doesn't look *quite* like the expected picture.
 
-    float2 cell_origin = floor(c);
+    float4x4 corners = cellCorners(c);
     
-    float2 cell00 = random2(cell_origin)[0];
-    float2 cell10 = random2(float2(cell_origin.x + 1, cell_origin.y))[0];
-    float2 cell01 = random2(float2(cell_origin.x, cell_origin.y + 1))[0];
-    float2 cell11 = random2(cell_origin + 1)[0];
-    float2 cell_corner_colors[] = { cell00, cell10, cell01, cell11 };
+    float2 color00 = random2(corners[0])[0];
+    float2 color10 = random2(corners[1])[0];
+    float2 color01 = random2(corners[2])[0];
+    float2 color11 = random2(corners[3])[0];
+    float2 colors[] = { color00, color10, color01, color11 };
 
-    float2 t = frac(c);
-
-    return bicubicInterpolation(cell_corner_colors, t);
+    return bicubicInterpolation(colors, frac(c));
 }
 
 // Returns the value of a 2D Perlin noise function at the given coordinates c
 float perlin2d(float2 c)
 {
-    float2 cell_origin = floor(c);
+    float4x4 corners = cellCorners(c);
     
-    float2 grad00 = random2(cell_origin);
-    float2 grad10 = random2(float2(cell_origin.x + 1, cell_origin.y));
-    float2 grad01 = random2(float2(cell_origin.x, cell_origin.y + 1));
-    float2 grad11 = random2(cell_origin + 1);
+    float2 grad00 = random2(corners[0]);
+    float2 grad10 = random2(corners[1]);
+    float2 grad01 = random2(corners[2]);
+    float2 grad11 = random2(corners[3]);
 
-    float2 distance00 = c - cell_origin;
-    float2 distance10 = c - float2(cell_origin.x + 1, cell_origin.y);
-    float2 distance01 = c - float2(cell_origin.x, cell_origin.y + 1);
-    float2 distance11 = c - (cell_origin + 1);
+    float2 distance00 = c - corners[0];
+    float2 distance10 = c - corners[1];
+    float2 distance01 = c - corners[2];
+    float2 distance11 = c - corners[3];
 
     float2 influence00 = dot(distance00, grad00);
     float2 influence10 = dot(distance10, grad10);
