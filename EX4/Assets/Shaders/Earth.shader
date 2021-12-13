@@ -62,14 +62,27 @@
                 {
                     float3 l = normalize(_WorldSpaceLightPos0);
                     float3 h = normalize((l + normalize(_WorldSpaceCameraPos)) / 2);
-                    float3 n = normalize(input.normal);
 
-                    fixed3 color = blinnPhong(n,
+                    bumpMapData bump;
+                    bump.normal = normalize(input.normal);
+                    bump.tangent = normalize(cross(input.normal, float3(0, 1, 0)));
+                    bump.uv = input.uv;
+                    bump.heightMap = _HeightMap;
+                    bump.du = _HeightMap_TexelSize[0];
+                    bump.dv = _HeightMap_TexelSize[1];
+                    bump.bumpScale = _BumpScale / 10000;
+
+                    fixed4 specular = tex2D(_SpecularMap, input.uv);
+
+                    float3 final_normal = (1 - specular) * getBumpMappedNormal(bump)
+                                          + specular * bump.normal;
+
+                    fixed3 color = blinnPhong(final_normal,
                                               h,
                                               l,
                                               _Shininess,
                                               tex2D(_AlbedoMap, input.uv),
-                                              tex2D(_SpecularMap, input.uv),
+                                              specular,
                                               _Ambient);
 
                     // TODO: Not sure about setting the alpha to 1 here.
