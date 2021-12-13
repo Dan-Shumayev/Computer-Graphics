@@ -90,8 +90,26 @@ float value2d(float2 c)
 // Returns the value of a 2D Perlin noise function at the given coordinates c
 float perlin2d(float2 c)
 {
-    // Your implementation
-    return 0;
+    float2 cell_origin = floor(c);
+    
+    float2 grad00 = random2(cell_origin);
+    float2 grad10 = random2(float2(cell_origin.x + 1, cell_origin.y));
+    float2 grad01 = random2(float2(cell_origin.x, cell_origin.y + 1));
+    float2 grad11 = random2(cell_origin + 1);
+
+    float2 distance00 = c - cell_origin;
+    float2 distance10 = c - float2(cell_origin.x + 1, cell_origin.y);
+    float2 distance01 = c - float2(cell_origin.x, cell_origin.y + 1);
+    float2 distance11 = c - (cell_origin + 1);
+
+    float2 influence00 = dot(distance00, grad00);
+    float2 influence10 = dot(distance10, grad10);
+    float2 influence01 = dot(distance01, grad01);
+    float2 influence11 = dot(distance11, grad11);
+
+    float2 influences[] = { influence00, influence10, influence01, influence11 };
+
+    return bicubicInterpolation(influences, frac(c));
 }
 
 // Returns the value of a 3D Perlin noise function at the given coordinates c
