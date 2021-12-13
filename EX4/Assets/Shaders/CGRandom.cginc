@@ -72,8 +72,19 @@ float triquinticInterpolation(float3 v[8], float3 t)
 // Returns the value of a 2D value noise function at the given coordinates c
 float value2d(float2 c)
 {
-    // Your implementation
-    return 0;
+    // TODO: This doesn't look *quite* like the expected picture.
+
+    float2 cell_origin = floor(c);
+    
+    float2 cell00 = random2(cell_origin)[0];
+    float2 cell10 = random2(float2(cell_origin.x + 1, cell_origin.y))[0];
+    float2 cell01 = random2(float2(cell_origin.x, cell_origin.y + 1))[0];
+    float2 cell11 = random2(cell_origin + 1)[0];
+    float2 cell_corner_colors[] = { cell00, cell10, cell01, cell11 };
+
+    float2 t = frac(c);
+
+    return bicubicInterpolation(cell_corner_colors, t);
 }
 
 // Returns the value of a 2D Perlin noise function at the given coordinates c
