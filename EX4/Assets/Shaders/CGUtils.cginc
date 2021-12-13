@@ -40,12 +40,10 @@ float3 getBumpMappedNormal(bumpMapData i)
     float fu = (tex2D(i.heightMap, float2(i.uv.x + i.du, i.uv.y)) - fp) / i.du;
     float fv = (tex2D(i.heightMap, float2(i.uv.x, i.uv.y + i.dv)) - fp) / i.dv;
 
-    float3 tu = float3(1, 0, i.bumpScale * fu);
-    float3 tv = float3(0, 1, i.bumpScale * fv);
-
-    // TODO: Negating the result (or changing the cross product order)
-    //       fixes the result. No idea why.
-	float3 nh = -normalize(cross(tv, tu));
+    // TODO: Doing this manually works fine, but using cross(tv, tu)
+    //       (with tv and tu defined as in the TA) gives a *negated* result.
+    //       No idea why.
+    float3 nh = normalize(float3(-i.bumpScale * fu, -i.bumpScale * fv, 1));
 
     float3 binormal = normalize(cross(i.tangent, i.normal));
 
