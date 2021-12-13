@@ -100,6 +100,8 @@ float value2d(float2 c)
 // Returns the value of a 2D Perlin noise function at the given coordinates c
 float perlin2d(float2 c)
 {
+    // TODO: This doesn't look *quite* like the expected picture.
+
     float4x4 corners = cellCorners(c);
     
     float2 grad00 = random2(corners[0]);
