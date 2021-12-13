@@ -57,8 +57,14 @@ float bicubicInterpolation(float2 v[4], float2 t)
 // at the given ratio t (a float2 with components between 0 and 1)
 float biquinticInterpolation(float2 v[4], float2 t)
 {
-    // Your implementation
-    return 0;
+    float2 u = t * t * t * (6 * t * t - 15 * t + 10); // Quintic interpolation
+
+    // Interpolate in the x direction
+    float x1 = lerp(v[0], v[1], u.x);
+    float x2 = lerp(v[2], v[3], u.x);
+
+    // Interpolate in the y direction and return
+    return lerp(x1, x2, u.y);
 }
 
 // Interpolates a given array v of 8 float3 values using triquintic interpolation
@@ -121,7 +127,7 @@ float perlin2d(float2 c)
 
     float2 influences[] = { influence00, influence10, influence01, influence11 };
 
-    return bicubicInterpolation(influences, frac(c));
+    return biquinticInterpolation(influences, frac(c));
 }
 
 // Returns the value of a 3D Perlin noise function at the given coordinates c
