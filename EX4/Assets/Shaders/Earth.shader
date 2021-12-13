@@ -60,12 +60,14 @@
 
                 fixed4 frag (v2f input) : SV_Target
                 {
+                    float3 v = normalize(_WorldSpaceCameraPos);
                     float3 l = normalize(_WorldSpaceLightPos0);
-                    float3 h = normalize((l + normalize(_WorldSpaceCameraPos)) / 2);
+                    float3 h = normalize((l + v) / 2);
+                    float3 n = normalize(input.normal);
 
                     bumpMapData bump;
-                    bump.normal = normalize(input.normal);
-                    bump.tangent = normalize(cross(input.normal, float3(0, 1, 0)));
+                    bump.normal = n;
+                    bump.tangent = normalize(cross(n, float3(0, 1, 0)));
                     bump.uv = input.uv;
                     bump.heightMap = _HeightMap;
                     bump.du = _HeightMap_TexelSize[0];
@@ -75,9 +77,9 @@
                     fixed4 specular = tex2D(_SpecularMap, input.uv);
 
                     float3 final_normal = (1 - specular) * getBumpMappedNormal(bump)
-                                          + specular * bump.normal;
+                                          + specular * n;
 
-                    fixed3 color = blinnPhong(final_normal,
+                    fixed3 blinn = blinnPhong(final_normal,
                                               h,
                                               l,
                                               _Shininess,
@@ -85,9 +87,13 @@
                                               specular,
                                               _Ambient);
 
+                    float3 lambert = max(0, dot(n, l));
+                    fixed3 atmosphere = (1 - max(0, dot(n, v))) * sqrt(lambert) * _AtmosphereColor.xyz;
+                    fixed3 clouds = tex2D(_CloudMap, input.uv) * (sqrt(lambert) + _Ambient);
+
                     // TODO: Not sure about setting the alpha to 1 here.
                     //       Maybe blinnPhong should actually return fixed4 and not fixed3?
-                    return fixed4(color, 1);
+                    return fixed4(blinn + atmosphere + clouds, 1);
                 }
 
             ENDCG
