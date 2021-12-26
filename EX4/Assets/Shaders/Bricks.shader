@@ -41,10 +41,11 @@ Shader "CG/Bricks"
 
                 struct v2f
                 {
-                    float4 pos     : SV_POSITION;
-                    float3 normal  : NORMAL;
-                    float4 tangent : TANGENT;
-                    float2 uv      : TEXCOORD0;
+                    float4 pos       : SV_POSITION;
+                    float3 normal    : TEXCOORD0;
+                    float4 tangent   : TEXCOORD1;
+                    float2 uv        : TEXCOORD2;
+                    float4 world_pos : TEXCOORD3;
                 };
 
                 v2f vert (appdata input)
@@ -54,13 +55,15 @@ Shader "CG/Bricks"
                     output.normal = mul(unity_ObjectToWorld, input.normal);
                     output.tangent = mul(unity_ObjectToWorld, input.tangent);
                     output.uv = input.uv;
+                    output.world_pos = mul(unity_ObjectToWorld, input.vertex);
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
                     float3 l = normalize(_WorldSpaceLightPos0);
-                    float3 h = normalize((l + normalize(_WorldSpaceCameraPos)) / 2);
+                    float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
+                    float3 h = normalize(l + v);
 
                     bumpMapData bump;
                     bump.normal = normalize(input.normal);
