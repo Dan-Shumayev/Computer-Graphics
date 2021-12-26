@@ -71,8 +71,20 @@ float biquinticInterpolation(float2 v[4], float2 t)
 // at the given ratio t (a float3 with components between 0 and 1)
 float triquinticInterpolation(float3 v[8], float3 t)
 {
-    // Your implementation
-    return 0;
+    float3 u = t * t * t * (6 * t * t - 15 * t + 10); // Quintic interpolation
+
+    // Interpolate in the x direction
+    float x1 = lerp(v[0], v[1], u.x);
+    float x2 = lerp(v[2], v[3], u.x);
+    float x3 = lerp(v[4], v[5], u.x);
+    float x4 = lerp(v[6], v[7], u.x);
+
+    // Interpolate in the y direction
+    float y1 = lerp(x1, x2, u.y);
+    float y2 = lerp(x3, x4, u.y);
+
+    // Interpolate in the z direction and return
+    return lerp(y1, y2, u.z);
 }
 
 float4x4 cellCorners(float2 c)
@@ -132,9 +144,49 @@ float perlin2d(float2 c)
 
 // Returns the value of a 3D Perlin noise function at the given coordinates c
 float perlin3d(float3 c)
-{                    
-    // Your implementation
-    return 0;
+{
+    float3 cell_origin = floor(c);
+
+    float3 corner000 = cell_origin + float3(0, 0, 0);
+    float3 corner100 = cell_origin + float3(1, 0, 0);
+    float3 corner010 = cell_origin + float3(0, 1, 0);
+    float3 corner110 = cell_origin + float3(1, 1, 0);
+    float3 corner001 = cell_origin + float3(0, 0, 1);
+    float3 corner101 = cell_origin + float3(1, 0, 1);
+    float3 corner011 = cell_origin + float3(0, 1, 1);
+    float3 corner111 = cell_origin + float3(1, 1, 1);
+
+    float3 grad000 = random3(corner000);
+    float3 grad100 = random3(corner100);
+    float3 grad010 = random3(corner010);
+    float3 grad110 = random3(corner110);
+    float3 grad001 = random3(corner001);
+    float3 grad101 = random3(corner101);
+    float3 grad011 = random3(corner011);
+    float3 grad111 = random3(corner111);
+
+    float3 distance000 = c - corner000;
+    float3 distance100 = c - corner100;
+    float3 distance010 = c - corner010;
+    float3 distance110 = c - corner110;
+    float3 distance001 = c - corner001;
+    float3 distance101 = c - corner101;
+    float3 distance011 = c - corner011;
+    float3 distance111 = c - corner111;
+
+    float3 influence000 = dot(distance000, grad000);
+    float3 influence100 = dot(distance100, grad100);
+    float3 influence010 = dot(distance010, grad010);
+    float3 influence110 = dot(distance110, grad110);
+    float3 influence001 = dot(distance001, grad001);
+    float3 influence101 = dot(distance101, grad101);
+    float3 influence011 = dot(distance011, grad011);
+    float3 influence111 = dot(distance111, grad111);
+
+    float3 influences[] = { influence000, influence100, influence010, influence110,
+							influence001, influence101, influence011, influence111};
+
+    return triquinticInterpolation(influences, frac(c));
 }
 
 
