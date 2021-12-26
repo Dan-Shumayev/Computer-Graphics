@@ -38,13 +38,13 @@
                 struct v2f
                 {
                     float4 pos      : SV_POSITION;
+                    float2 uv       : TEXCOORD0;
                 };
 
                 // Returns the value of a noise function simulating water, at coordinates uv and time t
                 float waterNoise(float2 uv, float t)
                 {
-                    // Your implementation
-                    return 0;
+                    return perlin2d(uv);
                 }
 
                 // Returns the world-space bump-mapped normal for the given bumpMapData and time t
@@ -64,7 +64,10 @@
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return 1;
+                    float color = waterNoise(_NoiseScale * input.uv, 0);
+                    color = color * 0.5 + 0.5; // Normalize to [0,1]
+
+                    return color;
                 }
 
             ENDCG
