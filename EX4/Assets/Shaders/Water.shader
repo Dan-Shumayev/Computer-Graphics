@@ -41,6 +41,7 @@
                     float2 uv        : TEXCOORD0;
                     float3 normal    : TEXCOORD1;
                     float4 world_pos : TEXCOORD2;
+                    float4 tangent   : TEXCOORD3;
                 };
 
                 // Returns the value of a noise function simulating water, at coordinates uv and time t
@@ -52,8 +53,17 @@
                 // Returns the world-space bump-mapped normal for the given bumpMapData and time t
                 float3 getWaterBumpMappedNormal(bumpMapData i, float t)
                 {
-                    // Your implementation
-                    return 0;
+                    float fp = waterNoise(i.uv, t);
+                    float fu = (waterNoise(float2(i.uv.x + i.du, i.uv.y), t) - fp) / i.du;
+                    float fv = (waterNoise(float2(i.uv.x, i.uv.y + i.dv), t) - fp) / i.dv;
+
+                    float3 nh = normalize(float3(-i.bumpScale * fu, -i.bumpScale * fv, 1));
+
+                    float3 binormal = normalize(cross(i.tangent, i.normal));
+
+                    float3 n_world = normalize(i.tangent * nh.x + i.normal * nh.z + binormal * nh.y);
+
+                    return n_world;
                 }
 
 
@@ -65,13 +75,22 @@
                     output.uv = input.uv;
                     output.normal = mul(unity_ObjectToWorld, input.normal);
                     output.world_pos = mul(unity_ObjectToWorld, input.vertex);
+                    output.tangent = mul(unity_ObjectToWorld, input.tangent);
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
+                    bumpMapData bump;
+                    bump.normal = normalize(input.normal);
+                    bump.tangent = normalize(input.tangent);
+                    bump.uv = input.uv;
+                    bump.du = DELTA;
+                    bump.dv = DELTA;
+                    bump.bumpScale = _BumpScale;
+
                     float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
-                    float3 n = normalize(input.normal);
+                    float3 n = getWaterBumpMappedNormal(bump, 0);
                     float3 r = 2 * dot(v, n) * n - v;
 
                     half4 reflected_color = texCUBE(_CubeMap, r);
