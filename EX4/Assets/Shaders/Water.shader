@@ -91,7 +91,7 @@
 
                     float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
                     float3 n = getWaterBumpMappedNormal(bump, _TimeScale * _Time.y);
-                    float3 r = 2 * dot(v, n) * n - v;
+                    float3 r = normalize(2 * dot(v, n) * n - v);
 
                     half4 reflected_color = texCUBE(_CubeMap, r);
 
