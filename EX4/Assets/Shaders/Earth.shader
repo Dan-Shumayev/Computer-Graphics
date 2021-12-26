@@ -43,7 +43,8 @@
                 struct v2f
                 {
                     float4 pos           : SV_POSITION;
-                    float3 object_normal : NORMAL;
+                    float3 object_normal : TEXCOORD0;
+                    float3 world_pos     : TEXCOORD1;
                 };
 
                 v2f vert (appdata input)
@@ -53,6 +54,7 @@
                     // TODO: Is this correct? Looks okay, but the specular highlight
                     //       is not in the exact same position as in the exercise description.
                     output.object_normal = input.vertex;
+                    output.world_pos = mul(unity_ObjectToWorld, input.vertex);
                     return output;
                 }
 
@@ -62,9 +64,9 @@
 
                     float2 uv = getSphericalUV(input.object_normal);
 
-                    float3 v = normalize(_WorldSpaceCameraPos);
+                    float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
                     float3 l = normalize(_WorldSpaceLightPos0);
-                    float3 h = normalize((l + v) / 2);
+                    float3 h = normalize(l + v);
                     float3 n = normalize(mul(unity_ObjectToWorld, input.object_normal));
 
                     bumpMapData bump;
