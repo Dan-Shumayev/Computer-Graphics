@@ -58,7 +58,9 @@
                 v2f vert (appdata input)
                 {
                     v2f output;
-                    output.pos = UnityObjectToClipPos(input.vertex);
+                    float3 displacement = normalize(input.normal) * _BumpScale * perlin2d(_NoiseScale * input.uv);
+                    output.pos = UnityObjectToClipPos(input.vertex + displacement);
+                    output.uv = input.uv;
                     return output;
                 }
 
