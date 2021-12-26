@@ -40,8 +40,8 @@
                     float4 pos       : SV_POSITION;
                     float2 uv        : TEXCOORD0;
                     float3 normal    : TEXCOORD1;
-                    float4 world_pos : TEXCOORD2;
-                    float4 tangent   : TEXCOORD3;
+                    float3 world_pos : TEXCOORD2;
+                    float3 tangent   : TEXCOORD3;
                 };
 
                 // Returns the value of a noise function simulating water, at coordinates uv and time t

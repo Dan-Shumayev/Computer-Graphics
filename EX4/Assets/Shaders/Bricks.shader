@@ -43,9 +43,9 @@ Shader "CG/Bricks"
                 {
                     float4 pos       : SV_POSITION;
                     float3 normal    : TEXCOORD0;
-                    float4 tangent   : TEXCOORD1;
+                    float3 tangent   : TEXCOORD1;
                     float2 uv        : TEXCOORD2;
-                    float4 world_pos : TEXCOORD3;
+                    float3 world_pos : TEXCOORD3;
                 };
 
                 v2f vert (appdata input)
