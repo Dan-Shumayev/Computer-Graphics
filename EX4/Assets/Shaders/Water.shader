@@ -47,7 +47,7 @@
                 // Returns the value of a noise function simulating water, at coordinates uv and time t
                 float waterNoise(float2 uv, float t)
                 {
-                    return perlin2d(uv);
+                    return perlin3d(0.5 * float3(uv, t)) + 0.5 * perlin3d(float3(uv, t)) + 0.2 * perlin3d(float3(2 * uv, 3 * t));
                 }
 
                 // Returns the world-space bump-mapped normal for the given bumpMapData and time t
@@ -90,7 +90,7 @@
                     bump.bumpScale = _BumpScale;
 
                     float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
-                    float3 n = getWaterBumpMappedNormal(bump, 0);
+                    float3 n = getWaterBumpMappedNormal(bump, _TimeScale * _Time.y);
                     float3 r = 2 * dot(v, n) * n - v;
 
                     half4 reflected_color = texCUBE(_CubeMap, r);
