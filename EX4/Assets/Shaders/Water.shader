@@ -84,7 +84,7 @@
                     bumpMapData bump;
                     bump.normal = normalize(input.normal);
                     bump.tangent = normalize(input.tangent);
-                    bump.uv = input.uv;
+                    bump.uv = _NoiseScale * input.uv;
                     bump.du = DELTA;
                     bump.dv = DELTA;
                     bump.bumpScale = _BumpScale;
