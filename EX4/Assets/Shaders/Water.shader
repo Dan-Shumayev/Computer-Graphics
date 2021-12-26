@@ -74,7 +74,7 @@
                     output.pos = UnityObjectToClipPos(input.vertex + displacement);
                     output.uv = input.uv;
                     output.normal = mul(unity_ObjectToWorld, input.normal);
-                    output.world_pos = mul(unity_ObjectToWorld, input.vertex);
+                    output.world_pos = mul(unity_ObjectToWorld, input.vertex + displacement);
                     output.tangent = mul(unity_ObjectToWorld, input.tangent);
                     return output;
                 }
