@@ -41,9 +41,9 @@ Shader "CG/Bricks"
 
                 struct v2f
                 {
-                    float4 pos       : SV_POSITION;
+                    float4 vertex    : SV_POSITION;
                     float3 normal    : TEXCOORD0;
-                    float3 tangent   : TEXCOORD1;
+                    float4 tangent   : TEXCOORD1;
                     float2 uv        : TEXCOORD2;
                     float3 world_pos : TEXCOORD3;
                 };
@@ -52,7 +52,7 @@ Shader "CG/Bricks"
                 {
                     v2f output;
                     
-                    output.pos = UnityObjectToClipPos(input.vertex);
+                    output.vertex = UnityObjectToClipPos(input.vertex);
                     output.normal = mul(unity_ObjectToWorld, input.normal);
                     output.tangent = mul(unity_ObjectToWorld, input.tangent);
                     output.uv = input.uv;
@@ -65,7 +65,7 @@ Shader "CG/Bricks"
                 {
                     float3 lightDir = normalize(_WorldSpaceLightPos0);
                     float3 viewDir = normalize(_WorldSpaceCameraPos - input.world_pos);
-                    float3 h = normalize(lightDir + viewDir);
+                    float3 halfWayVec = normalize(lightDir + viewDir);
 
                     bumpMapData bump = {
                         normalize(input.normal).xyz,
@@ -81,7 +81,7 @@ Shader "CG/Bricks"
                     //  Consider changing the ``BlinnPhong``'s return value to fixed4,
                     //      which makes sense in respect to its arguments' types.
                     return fixed4(blinnPhong(getBumpMappedNormal(bump),
-                                                h,
+                                                halfWayVec,
                                                 lightDir,
                                                 _Shininess,
                                                 tex2D(_AlbedoMap, input.uv),
