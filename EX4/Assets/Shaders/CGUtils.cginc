@@ -35,7 +35,8 @@ fixed3 blinnPhong(float3 n, float3 h, float3 l, float shininess, fixed4 albedo, 
     fixed4 ambient = ambientIntensity * albedo;
     fixed4 diffuse = max(0, dot(n, l)) * albedo;
     fixed4 specular = pow(max(0, dot(n, h)), shininess) * specularity;
-    return ambient + diffuse + specular;
+
+    return (ambient + diffuse + specular).xyz;
 }
 
 // Returns the world-space bump-mapped normal for the given bumpMapData

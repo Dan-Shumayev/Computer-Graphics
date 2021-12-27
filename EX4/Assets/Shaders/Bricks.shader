@@ -51,40 +51,42 @@ Shader "CG/Bricks"
                 v2f vert (appdata input)
                 {
                     v2f output;
+                    
                     output.pos = UnityObjectToClipPos(input.vertex);
                     output.normal = mul(unity_ObjectToWorld, input.normal);
                     output.tangent = mul(unity_ObjectToWorld, input.tangent);
                     output.uv = input.uv;
                     output.world_pos = mul(unity_ObjectToWorld, input.vertex);
+
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    float3 l = normalize(_WorldSpaceLightPos0);
-                    float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
-                    float3 h = normalize(l + v);
+                    float3 lightDir = normalize(_WorldSpaceLightPos0);
+                    float3 viewDir = normalize(_WorldSpaceCameraPos - input.world_pos);
+                    float3 h = normalize(lightDir + viewDir);
 
-                    bumpMapData bump;
-                    bump.normal = normalize(input.normal);
-                    bump.tangent = normalize(input.tangent);
-                    bump.uv = input.uv;
-                    bump.heightMap = _HeightMap;
-                    bump.du = _HeightMap_TexelSize[0];
-                    bump.dv = _HeightMap_TexelSize[1];
-                    bump.bumpScale = _BumpScale / 10000;
+                    bumpMapData bump = {
+                        normalize(input.normal).xyz,
+                        normalize(input.tangent).xyz,
+                        input.uv,
+                        _HeightMap,
+                        _HeightMap_TexelSize.x,
+                        _HeightMap_TexelSize.y,
+                        _BumpScale / 10000
+                    };
 
-                    fixed3 color = blinnPhong(getBumpMappedNormal(bump),
-                                              h,
-                                              l,
-                                              _Shininess,
-                                              tex2D(_AlbedoMap, input.uv),
-                                              tex2D(_SpecularMap, input.uv),
-                                              _Ambient);
-
-                    // TODO: Not sure about setting the alpha to 1 here.
-                    //       Maybe blinnPhong should actually return fixed4 and not fixed3?
-                    return fixed4(color, 1);
+                    // Alpha channel is probably a dummy value, so let it be 1/0.
+                    //  Consider changing the ``BlinnPhong``'s return value to fixed4,
+                    //      which makes sense in respect to its arguments' types.
+                    return fixed4(blinnPhong(getBumpMappedNormal(bump),
+                                                h,
+                                                lightDir,
+                                                _Shininess,
+                                                tex2D(_AlbedoMap, input.uv),
+                                                tex2D(_SpecularMap, input.uv),
+                                                _Ambient), 1);
                 }
 
             ENDCG
