@@ -91,13 +91,13 @@
                     bump.dv = DELTA;
                     bump.bumpScale = _BumpScale;
 
-                    float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
-                    float3 n = getWaterBumpMappedNormal(bump, _TimeScale * _Time.y);
-                    float3 r = normalize(2 * dot(v, n) * n - v);
+                    float3 viewDir = normalize(_WorldSpaceCameraPos - input.world_pos);
+                    float3 normal = getWaterBumpMappedNormal(bump, _TimeScale * _Time.y);
+                    float3 reflectDir = normalize(2 * dot(viewDir, normal) * normal - viewDir);
 
-                    half4 reflected_color = texCUBE(_CubeMap, r);
+                    half4 reflected_color = texCUBE(_CubeMap, reflectDir);
 
-                    half4 color = (1 - max(0, dot(n, v)) + 0.2) * reflected_color;
+                    half4 color = (1 - max(0, dot(normal, viewDir)) + 0.2) * reflected_color;
 
                     return color;
                 }

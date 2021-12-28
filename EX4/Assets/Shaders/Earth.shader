@@ -64,14 +64,14 @@
 
                     float2 uv = getSphericalUV(input.object_normal);
 
-                    float3 v = normalize(_WorldSpaceCameraPos - input.world_pos);
-                    float3 l = normalize(_WorldSpaceLightPos0);
-                    float3 h = normalize(l + v);
-                    float3 n = normalize(mul(unity_ObjectToWorld, input.object_normal));
+                    float3 viewDir = normalize(_WorldSpaceCameraPos - input.world_pos);
+                    float3 lightDir = normalize(_WorldSpaceLightPos0);
+                    float3 halfWayVec = normalize(lightDir + viewDir);
+                    float3 normal = normalize(mul(unity_ObjectToWorld, input.object_normal));
 
                     bumpMapData bump;
-                    bump.normal = n;
-                    bump.tangent = normalize(cross(n, float3(0, 1, 0)));
+                    bump.normal = normal;
+                    bump.tangent = normalize(cross(normal, float3(0, 1, 0)));
                     bump.uv = uv;
                     bump.heightMap = _HeightMap;
                     bump.du = _HeightMap_TexelSize.x;
@@ -81,18 +81,18 @@
                     fixed4 specular = tex2D(_SpecularMap, uv);
 
                     float3 final_normal = (1 - specular) * getBumpMappedNormal(bump)
-                                          + specular * n;
+                                          + specular * normal;
 
                     fixed3 blinn = blinnPhong(final_normal,
-                                              h,
-                                              l,
+                                              halfWayVec,
+                                              lightDir,
                                               _Shininess,
                                               tex2D(_AlbedoMap, uv),
                                               specular,
                                               _Ambient);
 
-                    float3 lambert = max(0, dot(n, l));
-                    fixed3 atmosphere = (1 - max(0, dot(n, v))) * sqrt(lambert) * _AtmosphereColor.xyz;
+                    float3 lambert = max(0, dot(normal, lightDir));
+                    fixed3 atmosphere = (1 - max(0, dot(normal, viewDir))) * sqrt(lambert) * _AtmosphereColor.xyz;
                     fixed3 clouds = tex2D(_CloudMap, uv) * (sqrt(lambert) + _Ambient);
 
                     return fixed4(blinn + atmosphere + clouds, 1);
