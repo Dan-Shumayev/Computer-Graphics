@@ -49,11 +49,11 @@
 
                 v2f vert (appdata input)
                 {
+                    float4 earth_center = float4(0, 0, 0, 1);
+                    
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
-                    // TODO: Is this correct? Looks okay, but the specular highlight
-                    //       is not in the exact same position as in the exercise description.
-                    output.object_normal = input.vertex;
+                    output.object_normal = input.vertex - earth_center;
                     output.world_pos = mul(unity_ObjectToWorld, input.vertex);
                     return output;
                 }
