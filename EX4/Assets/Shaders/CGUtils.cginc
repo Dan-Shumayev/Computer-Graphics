@@ -5,7 +5,7 @@
 
 // A struct containing all the data needed for bump-mapping
 struct bumpMapData
-{ 
+{
     float3 normal;       // Mesh surface normal at the point
     float3 tangent;      // Mesh surface tangent at the point
     float2 uv;           // UV coordinates of the point
@@ -46,9 +46,6 @@ float3 getBumpMappedNormal(bumpMapData i)
     float fu = (tex2D(i.heightMap, float2(i.uv.x + i.du, i.uv.y)) - fp) / i.du;
     float fv = (tex2D(i.heightMap, float2(i.uv.x, i.uv.y + i.dv)) - fp) / i.dv;
 
-    // TODO: Doing this manually works fine, but using cross(tv, tu)
-    //       (with tv and tu defined as in the TA) gives a *negated* result.
-    //       No idea why.
     float3 nh = normalize(float3(-i.bumpScale * fu, -i.bumpScale * fv, 1));
 
     float3 binormal = normalize(cross(i.tangent, i.normal));
