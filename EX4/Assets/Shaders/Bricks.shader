@@ -67,15 +67,14 @@ Shader "CG/Bricks"
                     float3 viewDir = normalize(_WorldSpaceCameraPos - input.world_pos);
                     float3 halfWayVec = normalize(lightDir + viewDir);
 
-                    bumpMapData bump = {
-                        normalize(input.normal),
-                        normalize(input.tangent),
-                        input.uv,
-                        _HeightMap,
-                        _HeightMap_TexelSize.x,
-                        _HeightMap_TexelSize.y,
-                        _BumpScale / 10000
-                    };
+                    bumpMapData bump;
+                    bump.normal = normalize(input.normal);
+                    bump.tangent = normalize(input.tangent);
+                    bump.uv = input.uv;
+                    bump.heightMap = _HeightMap;
+                    bump.du = _HeightMap_TexelSize.x;
+                    bump.dv = _HeightMap_TexelSize.y;
+                    bump.bumpScale = _BumpScale / 10000;
 
                     return fixed4(blinnPhong(getBumpMappedNormal(bump),
                                              halfWayVec,

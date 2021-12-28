@@ -50,7 +50,7 @@
                 v2f vert (appdata input)
                 {
                     float4 earth_center = float4(0, 0, 0, 1);
-                    
+
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
                     output.object_normal = input.vertex - earth_center;
@@ -74,8 +74,8 @@
                     bump.tangent = normalize(cross(n, float3(0, 1, 0)));
                     bump.uv = uv;
                     bump.heightMap = _HeightMap;
-                    bump.du = _HeightMap_TexelSize[0];
-                    bump.dv = _HeightMap_TexelSize[1];
+                    bump.du = _HeightMap_TexelSize.x;
+                    bump.dv = _HeightMap_TexelSize.y;
                     bump.bumpScale = _BumpScale / 10000;
 
                     fixed4 specular = tex2D(_SpecularMap, uv);
