@@ -90,8 +90,6 @@ float triquinticInterpolation(float3 v[8], float3 t)
 // Returns the value of a 2D value noise function at the given coordinates c
 float value2d(float2 c)
 {
-    // TODO: This doesn't look *quite* like the expected picture.
-
     float2 cell_origin = floor(c);
 
     float2 colors[4];
@@ -107,8 +105,6 @@ float value2d(float2 c)
 // Returns the value of a 2D Perlin noise function at the given coordinates c
 float perlin2d(float2 c)
 {
-    // TODO: This doesn't look *quite* like the expected picture.
-
     float2 cell_origin = floor(c);
 
     float2 influences[4];
