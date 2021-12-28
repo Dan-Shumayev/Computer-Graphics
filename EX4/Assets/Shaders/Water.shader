@@ -3,8 +3,8 @@
     Properties
     {
         _CubeMap("Reflection Cube Map", Cube) = "" {}
-        _NoiseScale("Texture Scale", Range(1, 100)) = 10 
-        _TimeScale("Time Scale", Range(0.1, 5)) = 3 
+        _NoiseScale("Texture Scale", Range(1, 100)) = 10
+        _TimeScale("Time Scale", Range(0.1, 5)) = 3
         _BumpScale("Bump Scale", Range(0, 0.5)) = 0.05
     }
     SubShader
@@ -28,7 +28,7 @@
                 uniform float _BumpScale;
 
                 struct appdata
-                { 
+                {
                     float4 vertex   : POSITION;
                     float3 normal   : NORMAL;
                     float4 tangent  : TANGENT;
@@ -69,12 +69,14 @@
 
                 v2f vert (appdata input)
                 {
-                    v2f output;
                     float3 displacement = normalize(input.normal) * _BumpScale * perlin2d(_NoiseScale * input.uv);
-                    output.pos = UnityObjectToClipPos(input.vertex + displacement);
+                    float4 displaced_vertex = input.vertex + float4(displacement, 0);
+
+                    v2f output;
+                    output.pos = UnityObjectToClipPos(displaced_vertex);
                     output.uv = input.uv;
                     output.normal = mul(unity_ObjectToWorld, input.normal);
-                    output.world_pos = mul(unity_ObjectToWorld, input.vertex + displacement);
+                    output.world_pos = mul(unity_ObjectToWorld, displaced_vertex);
                     output.tangent = mul(unity_ObjectToWorld, input.tangent);
                     return output;
                 }
