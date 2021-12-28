@@ -36,7 +36,7 @@
                 uniform fixed4 _AtmosphereColor;
 
                 struct appdata
-                { 
+                {
                     float4 vertex : POSITION;
                 };
 
@@ -95,8 +95,6 @@
                     fixed3 atmosphere = (1 - max(0, dot(n, v))) * sqrt(lambert) * _AtmosphereColor.xyz;
                     fixed3 clouds = tex2D(_CloudMap, uv) * (sqrt(lambert) + _Ambient);
 
-                    // TODO: Not sure about setting the alpha to 1 here.
-                    //       Maybe blinnPhong should actually return fixed4 and not fixed3?
                     return fixed4(blinn + atmosphere + clouds, 1);
                 }
 

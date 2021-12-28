@@ -32,7 +32,7 @@ Shader "CG/Bricks"
                 uniform float _BumpScale;
 
                 struct appdata
-                { 
+                {
                     float4 vertex   : POSITION;
                     float3 normal   : NORMAL;
                     float4 tangent  : TANGENT;
@@ -51,7 +51,7 @@ Shader "CG/Bricks"
                 v2f vert (appdata input)
                 {
                     v2f output;
-                    
+
                     output.vertex = UnityObjectToClipPos(input.vertex);
                     output.normal = mul(unity_ObjectToWorld, input.normal);
                     output.tangent = mul(unity_ObjectToWorld, input.tangent);
@@ -77,16 +77,14 @@ Shader "CG/Bricks"
                         _BumpScale / 10000
                     };
 
-                    // Alpha channel is probably a dummy value, so let it be 1/0.
-                    //  Consider changing the ``BlinnPhong``'s return value to fixed4,
-                    //      which makes sense in respect to its arguments' types.
                     return fixed4(blinnPhong(getBumpMappedNormal(bump),
-                                                halfWayVec,
-                                                lightDir,
-                                                _Shininess,
-                                                tex2D(_AlbedoMap, input.uv),
-                                                tex2D(_SpecularMap, input.uv),
-                                                _Ambient), 1);
+                                             halfWayVec,
+                                             lightDir,
+                                             _Shininess,
+                                             tex2D(_AlbedoMap, input.uv),
+                                             tex2D(_SpecularMap, input.uv),
+                                             _Ambient),
+                                  1);
                 }
 
             ENDCG
