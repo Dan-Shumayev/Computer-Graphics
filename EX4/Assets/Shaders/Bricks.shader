@@ -43,7 +43,7 @@ Shader "CG/Bricks"
                 {
                     float4 vertex    : SV_POSITION;
                     float3 normal    : TEXCOORD0;
-                    float4 tangent   : TEXCOORD1;
+                    float3 tangent   : TEXCOORD1; // Truncate to float3
                     float2 uv        : TEXCOORD2;
                     float3 world_pos : TEXCOORD3;
                 };
@@ -68,8 +68,8 @@ Shader "CG/Bricks"
                     float3 halfWayVec = normalize(lightDir + viewDir);
 
                     bumpMapData bump = {
-                        normalize(input.normal).xyz,
-                        normalize(input.tangent).xyz,
+                        normalize(input.normal),
+                        normalize(input.tangent),
                         input.uv,
                         _HeightMap,
                         _HeightMap_TexelSize.x,
