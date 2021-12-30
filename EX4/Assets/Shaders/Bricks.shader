@@ -32,7 +32,7 @@ Shader "CG/Bricks"
                 uniform float _BumpScale;
 
                 struct appdata
-                { 
+                {
                     float4 vertex   : POSITION;
                     float3 normal   : NORMAL;
                     float4 tangent  : TANGENT;
@@ -41,19 +41,49 @@ Shader "CG/Bricks"
 
                 struct v2f
                 {
-                    float4 pos : SV_POSITION;
+                    float4 vertex    : SV_POSITION;
+                    float3 normal    : TEXCOORD0;
+                    float3 tangent   : TEXCOORD1; // Truncate to float3
+                    float2 uv        : TEXCOORD2;
+                    float3 world_pos : TEXCOORD3;
                 };
 
                 v2f vert (appdata input)
                 {
                     v2f output;
-                    output.pos = UnityObjectToClipPos(input.vertex);
+
+                    output.vertex = UnityObjectToClipPos(input.vertex);
+                    output.normal = mul(unity_ObjectToWorld, input.normal);
+                    output.tangent = mul(unity_ObjectToWorld, input.tangent);
+                    output.uv = input.uv;
+                    output.world_pos = mul(unity_ObjectToWorld, input.vertex);
+
                     return output;
                 }
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return 1;
+                    float3 lightDir = normalize(_WorldSpaceLightPos0);
+                    float3 viewDir = normalize(_WorldSpaceCameraPos - input.world_pos);
+                    float3 halfWayVec = normalize(lightDir + viewDir);
+
+                    bumpMapData bump;
+                    bump.normal = normalize(input.normal);
+                    bump.tangent = normalize(input.tangent);
+                    bump.uv = input.uv;
+                    bump.heightMap = _HeightMap;
+                    bump.du = _HeightMap_TexelSize.x;
+                    bump.dv = _HeightMap_TexelSize.y;
+                    bump.bumpScale = _BumpScale / 10000;
+
+                    return fixed4(blinnPhong(getBumpMappedNormal(bump),
+                                             halfWayVec,
+                                             lightDir,
+                                             _Shininess,
+                                             tex2D(_AlbedoMap, input.uv),
+                                             tex2D(_SpecularMap, input.uv),
+                                             _Ambient),
+                                  1);
                 }
 
             ENDCG
