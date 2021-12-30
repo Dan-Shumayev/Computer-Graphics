@@ -60,8 +60,6 @@
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    // TODO: There's a strange discontinuity on the west side of the Earth.
-
                     float2 uv = getSphericalUV(input.object_normal);
 
                     float3 viewDir = normalize(_WorldSpaceCameraPos - input.world_pos);
