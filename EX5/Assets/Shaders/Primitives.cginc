@@ -71,7 +71,7 @@ void intersectPlane(Ray ray, inout RayHit bestHit, Material material, float3 c, 
 
 // Checks for an intersection between a ray and a plane
 // The plane passes through point c and has a surface normal n
-// The material returned is either m1 or m2 in a way that creates a checkerboard pattern 
+// The material returned is either m1 or m2 in a way that creates a checkerboard pattern
 void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Material m2, float3 c, float3 n)
 {
     // Your implementation
@@ -82,12 +82,55 @@ void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Materia
 // The triangle is defined by points a, b, c
 void intersectTriangle(Ray ray, inout RayHit bestHit, Material material, float3 a, float3 b, float3 c)
 {
-    // Your implementation
+    float3 n = normalize(cross(a - c, b - c));
+
+    //
+    // Find intersection between the ray and the plane of the triangle
+    //
+
+    RayHit planeHit = CreateRayHit();
+    intersectPlane(ray, planeHit, material, a, n);
+
+    if (isinf(planeHit.distance))
+    {
+        // No hit
+        return;
+    }
+
+    if (planeHit.distance >= bestHit.distance)
+    {
+        // Even if this point is within the triangle, it's worse than the current
+        // best hit. No sense in checking further.
+        return;
+    }
+
+    //
+    // Check that the hit point lies within the triangle
+    //
+
+    if (dot(cross(b - a, planeHit.position - a), n) < 0)
+    {
+        return;
+    }
+
+    if (dot(cross(c - b, planeHit.position - b), n) < 0)
+    {
+        return;
+    }
+
+    if (dot(cross(a - c, planeHit.position - c), n) < 0)
+    {
+        return;
+    }
+
+    // Everything checks out
+
+    bestHit = planeHit;
 }
 
 
 // Checks for an intersection between a ray and a 2D circle
-// The circle center is given by circle.xyz, its radius is circle.w and its orientation vector is n 
+// The circle center is given by circle.xyz, its radius is circle.w and its orientation vector is n
 void intersectCircle(Ray ray, inout RayHit bestHit, Material material, float4 circle, float3 n)
 {
     // Your implementation
