@@ -46,6 +46,9 @@ RayHit intersectScene(Ray ray)
 // Returns the color associated with the given ray and hit point
 float3 shadeHit(Ray ray, RayHit hit)
 {
+    // Note: _DirectionalLight gives the direction *from* the light source, so we negate it
+    //       for Blinn-Phong and shadow tracing.
+
     Ray shadowRay = CreateRay(hit.position + EPS * hit.normal, -_DirectionalLight.xyz, 0);
     RayHit shadowHit = intersectScene(shadowRay);
     if (isinf(shadowHit.distance))
