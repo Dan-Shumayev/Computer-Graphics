@@ -31,6 +31,11 @@ void intersectSphere(Ray ray, inout RayHit bestHit, Material material, float4 sp
         t = min(t0, t1);
     }
 
+    if (t >= bestHit.distance)
+    {
+        return;
+    }
+
     bestHit.position = ray.origin + t * ray.direction;
     bestHit.distance = t;
     bestHit.normal = normalize(bestHit.position - sphere.xyz);
