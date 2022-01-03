@@ -43,10 +43,19 @@ RayHit intersectScene(Ray ray)
     }
 }
 
-// Returns the color associated with the given ray and hit point 
+// Returns the color associated with the given ray and hit point
 float3 shadeHit(Ray ray, RayHit hit)
 {
-    return 1;
+    Ray shadowRay = CreateRay(hit.position + EPS * hit.normal, -_DirectionalLight.xyz, 0);
+    RayHit shadowHit = intersectScene(shadowRay);
+    if (isinf(shadowHit.distance))
+    {
+        return blinnPhong(hit.normal, -ray.direction, -_DirectionalLight.xyz, 50, hit.material.albedo);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 // Returns the color associated with the given ray that has missed all geometry
