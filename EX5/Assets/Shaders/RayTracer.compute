@@ -61,8 +61,23 @@ float3 shadeMiss(Ray ray)
 // Edits the given ray accordingly
 float3 trace(inout Ray ray)
 {
-    // Your implementation
-    return 0;
+    float3 color = 0;
+    float3 originalEnergy = ray.energy;
+
+    RayHit hit = intersectScene(ray);
+    if (isinf(hit.distance))
+    {
+        ray.energy = 0;
+        color = shadeMiss(ray);
+    }
+    else
+    {
+        color = shadeHit(ray, hit);
+    }
+
+    color *= originalEnergy;
+
+    return color;
 }
 
 // Creates and traces a view ray for each image pixel, then sets the
