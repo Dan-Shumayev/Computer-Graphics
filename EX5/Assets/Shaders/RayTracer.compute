@@ -84,6 +84,7 @@ float3 trace(inout Ray ray)
     else
     {
         color = shadeHit(ray, hit);
+        reflectRay(ray, hit);
     }
 
     color *= originalEnergy;
@@ -92,7 +93,7 @@ float3 trace(inout Ray ray)
 }
 
 // Creates and traces a view ray for each image pixel, then sets the
-// associated pixel's color according to the ray's journey throughout the scene 
+// associated pixel's color according to the ray's journey throughout the scene
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
@@ -106,8 +107,16 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     // Create a view ray and trace it
     Ray ray = CreateViewRay(uv);
-    float3 result = trace(ray);
-    
+    float3 result = 0;
+    for (int iteration = 0; iteration < _BounceLimit; ++iteration)
+    {
+        result += trace(ray);
+        if (!any(ray.energy))
+        {
+            break;
+        }
+    }
+
     // Set pixel color
     Result[id.xy] = float4(result, 1);
 }
