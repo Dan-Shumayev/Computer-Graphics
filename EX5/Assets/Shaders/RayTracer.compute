@@ -61,8 +61,7 @@ float3 shadeHit(Ray ray, RayHit hit)
 // Returns the color associated with the given ray that has missed all geometry
 float3 shadeMiss(Ray ray)
 {
-    // Your implementation
-    return 0;
+    return sampleSkybox(ray.direction);
 }
 
 // Traces the given ray in the currently selected scene
