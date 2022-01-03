@@ -2,7 +2,39 @@
 // The sphere center is given by sphere.xyz and its radius is sphere.w
 void intersectSphere(Ray ray, inout RayHit bestHit, Material material, float4 sphere)
 {
-    // Your implementation
+    float A = 1;
+
+    float B = 2 * dot(ray.origin - sphere.xyz, ray.direction);
+
+    float C = dot(ray.origin - sphere.xyz, ray.origin - sphere.xyz) - pow(sphere.w, 2);
+
+    float D = pow(B, 2) - 4 * A * C;
+    if (D < 0)
+    {
+        return;
+    }
+
+    float t0 = (-B + sqrt(D)) / (2 * A);
+    float t1 = (-B - sqrt(D)) / (2 * A);
+
+    float t = 0;
+    if (t0 < 0 && t1 < 0)
+    {
+        return;
+    }
+    else if (t0 < 0 || t1 < 0)
+    {
+        t = max(t0, t1);
+    }
+    else
+    {
+        t = min(t0, t1);
+    }
+
+    bestHit.position = ray.origin + t * ray.direction;
+    bestHit.distance = t;
+    bestHit.normal = normalize(bestHit.position - sphere.xyz);
+    bestHit.material = material;
 }
 
 // Checks for an intersection between a ray and a plane
