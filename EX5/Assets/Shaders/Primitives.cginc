@@ -224,7 +224,67 @@ void intersectCircle(Ray ray, inout RayHit bestHit, Material material, float4 ci
 
 // Checks for an intersection between a ray and a cylinder aligned with the Y axis
 // The cylinder center is given by cylinder.xyz, its radius is cylinder.w and its height is h
+// Intersection with the cylinder caps *is not* checked
+void intersectCylinderYWithoutCaps(Ray ray, inout RayHit bestHit, Material material, float4 cylinder, float h)
+{
+    float A = dot(ray.direction.xz, ray.direction.xz);
+
+    float B = 2 * dot(ray.origin.xz - cylinder.xz, ray.direction.xz);
+
+    float C = dot(ray.origin.xz - cylinder.xz, ray.origin.xz - cylinder.xz) - pow(cylinder.w, 2);
+
+    float D = pow(B, 2) - 4 * A * C;
+    if (D < 0)
+    {
+        return;
+    }
+
+    float t0 = (-B + sqrt(D)) / (2 * A);
+    float t1 = (-B - sqrt(D)) / (2 * A);
+
+    float t = 0;
+    if (t0 < 0 && t1 < 0)
+    {
+        return;
+    }
+    else if (t0 < 0 || t1 < 0)
+    {
+        t = max(t0, t1);
+    }
+    else
+    {
+        t = min(t0, t1);
+    }
+
+    if (t >= bestHit.distance)
+    {
+        return;
+    }
+
+    float3 position = ray.origin + t * ray.direction;
+
+    if (distance(position.y, cylinder.y) > h / 2)
+    {
+        return;
+    }
+
+    bestHit.position = position;
+    bestHit.distance = t;
+    bestHit.normal = normalize(float3(position.x, 0, position.z) - float3(cylinder.x, 0, cylinder.z));
+    bestHit.material = material;
+}
+
+// Checks for an intersection between a ray and a cylinder aligned with the Y axis
+// The cylinder center is given by cylinder.xyz, its radius is cylinder.w and its height is h
 void intersectCylinderY(Ray ray, inout RayHit bestHit, Material material, float4 cylinder, float h)
 {
-    // Your implementation
+    // TODO: explain this in the README
+
+    intersectCylinderYWithoutCaps(ray, bestHit, material, cylinder, h);
+
+    // Intersect with the top cap
+    intersectCircle(ray, bestHit, material, float4(cylinder.x, cylinder.y + h / 2, cylinder.z, cylinder.w), float3(0, 1, 0));
+
+    // Intersect with the bottom cap
+    intersectCircle(ray, bestHit, material, float4(cylinder.x, cylinder.y - h / 2, cylinder.z, cylinder.w), float3(0, -1, 0));
 }
