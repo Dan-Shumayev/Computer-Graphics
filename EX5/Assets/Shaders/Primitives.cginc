@@ -187,7 +187,38 @@ void intersectTriangle(Ray ray, inout RayHit bestHit, Material material, float3 
 // The circle center is given by circle.xyz, its radius is circle.w and its orientation vector is n
 void intersectCircle(Ray ray, inout RayHit bestHit, Material material, float4 circle, float3 n)
 {
-    // Your implementation
+    //
+    // Find intersection between the ray and the plane of the circle
+    //
+
+    RayHit planeHit = CreateRayHit();
+    intersectPlane(ray, planeHit, material, circle.xyz, n);
+
+    if (isinf(planeHit.distance))
+    {
+        // No hit
+        return;
+    }
+
+    if (planeHit.distance >= bestHit.distance)
+    {
+        // Even if this point is within the circle, it's worse than the current
+        // best hit. No sense in checking further.
+        return;
+    }
+
+    //
+    // Check that the hit point lies within the circle
+    //
+
+    if (distance(planeHit.position, circle.xyz) > circle.w)
+    {
+        return;
+    }
+
+    // Everything checks out
+
+    bestHit = planeHit;
 }
 
 
