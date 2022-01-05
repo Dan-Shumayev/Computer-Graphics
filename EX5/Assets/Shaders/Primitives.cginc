@@ -100,26 +100,26 @@ void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Materia
     // Find the material to use
     //
 
-    float u;
-    float v;
+    float2 uv;
     if (1 == abs(n.x))  // YZ plane
     {
-        u = dot(planeHit.position - c, float3(0, 0, 1));
-        v = dot(planeHit.position - c, float3(0, 1, 0));
+        uv = float2(dot(planeHit.position - c, float3(0, 0, 1)),
+                    dot(planeHit.position - c, float3(0, 1, 0)));
     }
     else if (1 == abs(n.y))  // XZ plane
     {
-        u = dot(planeHit.position - c, float3(1, 0, 0));
-        v = dot(planeHit.position - c, float3(0, 0, 1));
+        uv = float2(dot(planeHit.position - c, float3(1, 0, 0)),
+                    dot(planeHit.position - c, float3(0, 0, 1)));
     }
     else  // XY plane
     {
-        u = dot(planeHit.position - c, float3(1, 0, 0));
-        v = dot(planeHit.position - c, float3(0, 1, 0));
+        uv = float2(dot(planeHit.position - c, float3(1, 0, 0)),
+                    dot(planeHit.position - c, float3(0, 1, 0)));
     }
+    uv = floor(uv / 0.5);
 
-    uint material = ((int)floor(u / 0.5) + (int)floor(v / 0.5)) % 2;
-    if (material)
+    float material = frac((uv.x + uv.y) / 2);
+    if (0 != material)
     {
         planeHit.material = m2;
     }
