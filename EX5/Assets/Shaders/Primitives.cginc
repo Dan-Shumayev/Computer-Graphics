@@ -74,8 +74,6 @@ void intersectPlane(Ray ray, inout RayHit bestHit, Material material, float3 c, 
 // The material returned is either m1 or m2 in a way that creates a checkerboard pattern
 void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Material m2, float3 c, float3 n)
 {
-    // TODO: explain this in the README
-
     //
     // Find intersection between the ray and the plane
     //

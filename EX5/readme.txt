@@ -1,3 +1,32 @@
+intersectPlaneCheckered
+========================
+
+First, observe that the problem boils down to finding the Manhattan distance between
+the hit point and the plane's "origin", going by squares with side 0.5.
+If the distance is even, the corresponding square is black. Otherwise, it is white.
+
+Thus, we take the vector from the plane's origin to the hit point, project it on
+the plane's axes (e.g. for the XZ plane, we project on X and on Z), divide
+each coordinate by 0.5, and floor it. If the original hit point coordinate was
+positive relative to the plane origin, this yield the Manhattan distance in that
+coordinate's direction. If the coordinate was negative, this yields the Manhattan
+distance + 1. For instance:
+
+1. If the hit point was at (0.3, 0.7) we get (0, 1).
+2. If the hit point was at (-0.3, 0.7) we get (-1, 1).
+
+This is a good thing! Since for negative coordinates the checkerboard pattern
+is inverted: even squares are white, and odd are black.
+
+Now, we add the two coordinates, divide by 2, and check the fractional part. If it is 0,
+we use material 1. Otherwise, we use material 2.
+
+Wait, but shouldn't we take the absolute value of each coordinate before adding them?
+After all, Manhattan distance is a non-negative value. Techincally that is correct, but
+we only care about the parity of the sum, and that is not affected by the signs of the
+operands.
+
+
 intersectCylinderY
 ===================
 
