@@ -74,7 +74,61 @@ void intersectPlane(Ray ray, inout RayHit bestHit, Material material, float3 c, 
 // The material returned is either m1 or m2 in a way that creates a checkerboard pattern
 void intersectPlaneCheckered(Ray ray, inout RayHit bestHit, Material m1, Material m2, float3 c, float3 n)
 {
-    // Your implementation
+    // TODO: explain this in the README
+
+    //
+    // Find intersection between the ray and the plane
+    //
+
+    RayHit planeHit = CreateRayHit();
+    intersectPlane(ray, planeHit, m1, c, n);
+
+    if (isinf(planeHit.distance))
+    {
+        // No hit
+        return;
+    }
+
+    if (planeHit.distance >= bestHit.distance)
+    {
+        // Even if this point is on the plane, it's worse than the current
+        // best hit. No sense in checking further.
+        return;
+    }
+
+    //
+    // Find the material to use
+    //
+
+    float u;
+    float v;
+    if (1 == abs(n.x))  // YZ plane
+    {
+        u = dot(planeHit.position - c, float3(0, 0, 1));
+        v = dot(planeHit.position - c, float3(0, 1, 0));
+    }
+    else if (1 == abs(n.y))  // XZ plane
+    {
+        u = dot(planeHit.position - c, float3(1, 0, 0));
+        v = dot(planeHit.position - c, float3(0, 0, 1));
+    }
+    else  // XY plane
+    {
+        u = dot(planeHit.position - c, float3(1, 0, 0));
+        v = dot(planeHit.position - c, float3(0, 1, 0));
+    }
+
+    uint material = ((int)floor(u / 0.5) + (int)floor(v / 0.5)) % 2;
+    if (material)
+    {
+        planeHit.material = m2;
+    }
+    else
+    {
+        planeHit.material = m1;
+    }
+
+    bestHit = planeHit;
 }
 
 
