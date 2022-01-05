@@ -268,9 +268,13 @@ void intersectCylinderYWithoutCaps(Ray ray, inout RayHit bestHit, Material mater
         return;
     }
 
+    // Normal is in the XZ plane, pointing from the center of the cylinder
+    // to the hit point
+    float3 normal = normalize(float3(position.x, 0, position.z) - float3(cylinder.x, 0, cylinder.z));
+
     bestHit.position = position;
     bestHit.distance = t;
-    bestHit.normal = normalize(float3(position.x, 0, position.z) - float3(cylinder.x, 0, cylinder.z));
+    bestHit.normal = normal;
     bestHit.material = material;
 }
 
@@ -278,13 +282,17 @@ void intersectCylinderYWithoutCaps(Ray ray, inout RayHit bestHit, Material mater
 // The cylinder center is given by cylinder.xyz, its radius is cylinder.w and its height is h
 void intersectCylinderY(Ray ray, inout RayHit bestHit, Material material, float4 cylinder, float h)
 {
-    // TODO: explain this in the README
-
     intersectCylinderYWithoutCaps(ray, bestHit, material, cylinder, h);
 
-    // Intersect with the top cap
-    intersectCircle(ray, bestHit, material, float4(cylinder.x, cylinder.y + h / 2, cylinder.z, cylinder.w), float3(0, 1, 0));
+    // Intersect with the top cap, which is h/2 units upward on the Y-axis,
+    // with a normal pointing *up* (outside the cylinder).
+    intersectCircle(ray, bestHit, material,
+                    float4(cylinder.x, cylinder.y + h / 2, cylinder.z, cylinder.w),
+                    float3(0, 1, 0));
 
-    // Intersect with the bottom cap
-    intersectCircle(ray, bestHit, material, float4(cylinder.x, cylinder.y - h / 2, cylinder.z, cylinder.w), float3(0, -1, 0));
+    // Intersect with the bottom cap, which is h/2 units downward on the Y-axis,
+    // with a normal pointing *down* (outside the cylinder).
+    intersectCircle(ray, bestHit, material,
+                    float4(cylinder.x, cylinder.y - h / 2, cylinder.z, cylinder.w),
+                    float3(0, -1, 0));
 }
