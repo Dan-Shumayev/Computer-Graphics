@@ -43,17 +43,28 @@ RayHit intersectScene(Ray ray)
     }
 }
 
-// Returns the color associated with the given ray and hit point 
+// Returns the color associated with the given ray and hit point
 float3 shadeHit(Ray ray, RayHit hit)
 {
-    return 1;
+    // Note: _DirectionalLight gives the direction *from* the light source, so we negate it
+    //       for Blinn-Phong and shadow tracing.
+
+    Ray shadowRay = CreateRay(hit.position + EPS * hit.normal, -_DirectionalLight.xyz, 0);
+    RayHit shadowHit = intersectScene(shadowRay);
+    if (isinf(shadowHit.distance))
+    {
+        return blinnPhong(hit.normal, -ray.direction, -_DirectionalLight.xyz, 50, hit.material.albedo);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 // Returns the color associated with the given ray that has missed all geometry
 float3 shadeMiss(Ray ray)
 {
-    // Your implementation
-    return 0;
+    return sampleSkybox(ray.direction);
 }
 
 // Traces the given ray in the currently selected scene
@@ -61,12 +72,36 @@ float3 shadeMiss(Ray ray)
 // Edits the given ray accordingly
 float3 trace(inout Ray ray)
 {
-    // Your implementation
-    return 0;
+    float3 color = 0;
+    float3 originalEnergy = ray.energy;
+
+    RayHit hit = intersectScene(ray);
+    if (isinf(hit.distance))
+    {
+        ray.energy = 0;
+        color = shadeMiss(ray);
+    }
+    else
+    {
+        color = shadeHit(ray, hit);
+
+        if (-1 == hit.material.refractiveIndex)
+        {
+            reflectRay(ray, hit);
+        }
+        else
+        {
+            refractRay(ray, hit);
+        }
+    }
+
+    color *= originalEnergy;
+
+    return color;
 }
 
 // Creates and traces a view ray for each image pixel, then sets the
-// associated pixel's color according to the ray's journey throughout the scene 
+// associated pixel's color according to the ray's journey throughout the scene
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
@@ -80,8 +115,16 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     // Create a view ray and trace it
     Ray ray = CreateViewRay(uv);
-    float3 result = trace(ray);
-    
+    float3 result = 0;
+    for (int iteration = 0; iteration < _BounceLimit; ++iteration)
+    {
+        result += trace(ray);
+        if (!any(ray.energy))
+        {
+            break;
+        }
+    }
+
     // Set pixel color
     Result[id.xy] = float4(result, 1);
 }
